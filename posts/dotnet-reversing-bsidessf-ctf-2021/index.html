@@ -1,0 +1,228 @@
+<!doctype html><html lang=en><head><title>dotNET Reversing | KeyGenMe | BsidesSF CTF 2021 :: CTF Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="This was a nice challenge which didn't have too much complexity but seemed interesting at the same time! I solved this challenge with the help of my crypto friend [deuterium](https://github.com/deut-erium). This was a rather a different dotNET reversing challenge that I have done till now. This actually had something to reverse xD"><meta name=keywords content="[CTF Reverse Engineering Player Wolf WriteUps]"><meta name=robots content="noodp"><link rel=canonical href=/posts/dotnet-reversing-bsidessf-ctf-2021/><link rel=stylesheet href=/assets/style.css><link rel=stylesheet href=/assets/red.css><link rel=apple-touch-icon href=/img/apple-touch-icon-192x192.png><link rel="shortcut icon" href=/images/wolf.ico><meta name=twitter:card content="summary"><meta name=twitter:creator content="AmunRha"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="og:title" content="dotNET Reversing | KeyGenMe | BsidesSF CTF 2021"><meta property="og:description" content="This was a nice challenge which didn't have too much complexity but seemed interesting at the same time! I solved this challenge with the help of my crypto friend [deuterium](https://github.com/deut-erium). This was a rather a different dotNET reversing challenge that I have done till now. This actually had something to reverse xD"><meta property="og:url" content="/posts/dotnet-reversing-bsidessf-ctf-2021/"><meta property="og:site_name" content="CTF Blog"><meta property="og:image" content="/images/wolf.ico"><meta property="og:image:width" content="2048"><meta property="og:image:height" content="1024"><meta property="article:published_time" content="2021-03-21 00:00:00 +0000 UTC"></head><body class=red><div class="container center headings--one-size"><header class=header><div class=header__inner><div class=header__logo><a href=/><div class=logo>AmunRha's Blog</div></a></div><div class=menu-trigger>menu</div></div><nav class=menu><ul class="menu__inner menu__inner--desktop"><li><a href=/about>About</a></li></ul><ul class="menu__inner menu__inner--mobile"><li><a href=/about>About</a></li></ul></nav></header><div class=content><div class=post><h1 class=post-title><a href=/posts/dotnet-reversing-bsidessf-ctf-2021/>dotNET Reversing | KeyGenMe | BsidesSF CTF 2021</a></h1><div class=post-meta><span class=post-date>2021-03-21</span>
+<span class=post-author>:: AmunRha</span></div><div class=post-content><div><h1 id=dotnet-reversing--keygenme--bsidessf-ctf-2021>dotNET Reversing | KeyGenMe | BsidesSF CTF 2021<a href=#dotnet-reversing--keygenme--bsidessf-ctf-2021 class=hanchor arialabel=Anchor>&#8983;</a></h1><p>Tags: bsidesSF21, crypto, dotNET, reversing</p><p>Writeup by: AmunRha</p><p>This was a nice challenge which didn&rsquo;t have too much complexity but seemed interesting at the same time! I solved this challenge with the help of my crypto friend <a href=https://github.com/deut-erium>deuterium</a>. This was a rather a different dotNET reversing challenge that I have done till now. This actually had something to reverse xD</p><p>So lets get started with the challenge.</p><h1 id=intro>Intro<a href=#intro class=hanchor arialabel=Anchor>&#8983;</a></h1><p>Running the executable shows us this window,</p><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled.png></p><p>Since this a dotNET reversing challenge, fire up dnSpy and start to decompile the functions.</p><p>We can see that there are 6 major functions in the given executable file.</p><p>The main function is where it always starts, so lets check that.</p><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%201.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%201.png></p><p>There is a call to <code>KeygenForm()</code> which calls its constructor, which further has a call to <code>InitializeComponent()</code>.</p><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%202.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%202.png></p><p>Well we can definitely see that it initializes a lot of things. Keeping this in our mind we proceed to check the other functions.</p><p>We find that the <code>activate_btn_Click()</code> function is where the program&rsquo;s core logic is starting at.</p><h1 id=activate_btn_click><code>activate_btn_Click()</code><a href=#activate_btn_click class=hanchor arialabel=Anchor>&#8983;</a></h1><p>Let&rsquo;s run through what it does.</p><p>So, we see that our input is stored inside <code>this.key_input.Text</code> which is passed as a parameter to the constructor of the class <code>keyCheck</code></p><p>Then we see that another function <code>keyCheck.Success</code> is called and the result is checked as well.</p><p>Alright, then it has some kind of attribute <code>keyCheck.KeyBytes</code> which is passed as a parameter to the constructor of the class <code>Crypter</code> . Then the result of the function <code>crypter.checkKeyId()</code> is checked.</p><p>But wait, we see there is a new parameter here called <code>KeygenForm.keyId</code> . Let&rsquo;s see what that contains,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>readonly</span> <span style=color:#66d9ef>string</span> keyId = <span style=color:#e6db74>&#34;ed2591b6660b2b05a0e5b22152b120cd59458eb2504c529927ff9a4890b6912e&#34;</span>;
+</code></pre></div><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%203.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%203.png></p><p>Alright, seems some kind of hash. Depending upon the result returned, the Fail condition will be printed out or the decryption algorithm will run giving us the flag.</p><p>Alright, seems fairly easy enough. Why can&rsquo;t we just bypass all these checks and run over to the decryption routine? Good idea, but won&rsquo;t work. We will get to know why once I explain the other functions.</p><p>So we kind of can make sense of what is happening,</p><ul><li>Get input and format it</li><li>Check with the <code>success</code> function</li><li>Check with the <code>crypter</code> functions</li><li>Run the decryption routine</li></ul><p>Let&rsquo;s run over function calls, tracking what happens to our input then.</p><h1 id=keycheck><code>KeyCheck</code><a href=#keycheck class=hanchor arialabel=Anchor>&#8983;</a></h1><h2 id=constructor--public-keycheckstring-keystr>Constructor — <code>public KeyCheck(string keyStr)</code><a href=#constructor--public-keycheckstring-keystr class=hanchor arialabel=Anchor>&#8983;</a></h2><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%204.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%204.png></p><p>We see the constructor, we can immediately notice that the constructor takes our input and trims it off the newline characters at the start and the end.</p><p>Then it splits the input with the delimiter as space — <code>new char[0]</code> — and then iterates over the array converting all the words in the array to lower case [this means it doesn&rsquo;t matter if the input is of upper case or lower case letters].</p><p>This new list of words are stored into the class member <code>keywords</code></p><p>Next, we see the call to <code>keyCheck.Success</code> in the parent function we came from,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>void</span> activate_btn_Click(<span style=color:#66d9ef>object</span> sender, EventArgs e)
+		{
+			KeyCheck keyCheck = <span style=color:#66d9ef>new</span> KeyCheck(<span style=color:#66d9ef>this</span>.key_input.Text);
+			<span style=color:#66d9ef>this</span>.resultsBox.Visible = <span style=color:#66d9ef>true</span>;
+			<span style=color:#66d9ef>this</span>.flag_label.Visible = <span style=color:#66d9ef>false</span>;
+			<span style=color:#66d9ef>if</span> (!keyCheck.Success)
+			{
+				<span style=color:#66d9ef>this</span>.results_text.Text = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;Failed: {0}&#34;</span>, keyCheck.Error);
+				<span style=color:#66d9ef>return</span>;
+			}
+			Crypter crypter = <span style=color:#66d9ef>new</span> Crypter(keyCheck.KeyBytes);
+			<span style=color:#66d9ef>if</span> (!crypter.checkKeyId(KeygenForm.keyId))
+			{
+				<span style=color:#66d9ef>this</span>.results_text.Text = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;Invalid KeyID for this build.&#34;</span>, <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>object</span>[<span style=color:#ae81ff>0</span>]);
+				<span style=color:#66d9ef>return</span>;
+			}
+			<span style=color:#66d9ef>string</span> text = crypter.decryptHexString(<span style=color:#66d9ef>this</span>.secret_text.Text);
+			<span style=color:#66d9ef>this</span>.flag_label.Text = text;
+			<span style=color:#66d9ef>this</span>.flag_label.Visible = <span style=color:#66d9ef>true</span>;
+			<span style=color:#66d9ef>this</span>.results_text.Text = <span style=color:#e6db74>&#34;Product unlocked.&#34;</span>;
+		}
+</code></pre></div><h2 id=keychecksuccess><code>keyCheck.Success</code><a href=#keychecksuccess class=hanchor arialabel=Anchor>&#8983;</a></h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>bool</span> Success
+		{
+			<span style=color:#66d9ef>get</span>
+			{
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.runCheck();
+			}
+		}
+</code></pre></div><p>It seems to call and return the result of another member function <code>runCheck()</code> .</p><p>Alright let&rsquo;s head over to that then.</p><h2 id=runcheck><code>runCheck()</code><a href=#runcheck class=hanchor arialabel=Anchor>&#8983;</a></h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>bool</span> runCheck()
+		{
+			<span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.resChecked)
+			{
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.success;
+			}
+			<span style=color:#66d9ef>this</span>.resChecked = <span style=color:#66d9ef>true</span>;
+			<span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.keywords == <span style=color:#66d9ef>null</span>)
+			{
+				<span style=color:#66d9ef>this</span>.err = <span style=color:#e6db74>&#34;No key provided.&#34;</span>;
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+			}
+			<span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.keywords[<span style=color:#ae81ff>0</span>] != KeyCheck.keyIdentifier)
+			{
+				<span style=color:#66d9ef>this</span>.err = <span style=color:#e6db74>&#34;Wrong key identifier.&#34;</span>;
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+			}
+			<span style=color:#66d9ef>if</span> (<span style=color:#66d9ef>this</span>.keywords.Length != KeyCheck.strength)
+			{
+				<span style=color:#66d9ef>this</span>.err = <span style=color:#e6db74>&#34;Incorrect key strength.&#34;</span>;
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+			}
+			<span style=color:#66d9ef>if</span> (!<span style=color:#66d9ef>this</span>.dupeCheck())
+			{
+				<span style=color:#66d9ef>this</span>.err = <span style=color:#e6db74>&#34;Duplicate key pieces.&#34;</span>;
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+			}
+			<span style=color:#66d9ef>int</span>[] array = <span style=color:#66d9ef>this</span>.wordsToInts(<span style=color:#66d9ef>this</span>.keywords);
+			<span style=color:#66d9ef>if</span> (array == <span style=color:#66d9ef>null</span>)
+			{
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+			}
+			<span style=color:#66d9ef>this</span>.keyBytes = <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>byte</span>[array.Length * <span style=color:#ae81ff>4</span>];
+			<span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i = <span style=color:#ae81ff>0</span>; i &lt; array.Length; i++)
+			{
+				BitConverter.GetBytes(array[i]).CopyTo(<span style=color:#66d9ef>this</span>.keyBytes, i * <span style=color:#ae81ff>4</span>);
+			}
+			<span style=color:#66d9ef>this</span>.success = <span style=color:#66d9ef>true</span>;
+			<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.success;
+		}
+</code></pre></div><p>The function runs over a few checks with our input (stored as a list of words in <code>keywords</code>)</p><p>So, let&rsquo;s try to pass all these checks one by one with the explanation,</p><ul><li>The list of words must not be empty — Well, the check is self explanatory</li><li>The first word in the list must be equal to <code>keyCheck.keyIdentifier</code> , which is &ldquo;system&rdquo;,</li></ul><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>readonly</span> <span style=color:#66d9ef>string</span> keyIdentifier = <span style=color:#e6db74>&#34;system&#34;</span>;
+</code></pre></div><ul><li>The length of the array must be equal to <code>KeyCheck.strength</code> , which is 5 — 5 words in total then</li></ul><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>readonly</span> <span style=color:#66d9ef>int</span> strength = <span style=color:#ae81ff>5</span>;
+</code></pre></div><ul><li>All words in the input must be unique — The error code is self explanatory for this, no need to check the code xD</li></ul><blockquote><p>This function and the previous function gives us the way on how the input must be supplied, which is,
+<code>system word1 word2 word3 word4</code></p></blockquote><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%205.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%205.png></p><p>So once we do all these we see a new function called <code>wordsToInts()</code> being called with the list as the parameter.</p><p>Let&rsquo;s see what that does.</p><h2 id=wordstoints><code>wordsToInts()</code><a href=#wordstoints class=hanchor arialabel=Anchor>&#8983;</a></h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>int</span>[] wordsToInts(<span style=color:#66d9ef>string</span>[] words)
+		{
+			Wordlist instance = Wordlist.Instance;
+			<span style=color:#66d9ef>int</span>[] array = <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>int</span>[words.Length];
+			<span style=color:#66d9ef>int</span>[] array2 = <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>int</span>[]
+			{
+				<span style=color:#ae81ff>1</span>,
+				<span style=color:#ae81ff>3</span>,
+				<span style=color:#ae81ff>11</span>,
+				<span style=color:#ae81ff>5</span>,
+				<span style=color:#ae81ff>1</span>
+			};
+			<span style=color:#66d9ef>int</span> num = <span style=color:#ae81ff>85</span>;
+			<span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i = <span style=color:#ae81ff>0</span>; i &lt; words.Length; i++)
+			{
+				<span style=color:#66d9ef>int</span> num2 = instance.wordIndex(words[i]);
+				<span style=color:#66d9ef>if</span> (num2 == -<span style=color:#ae81ff>1</span>)
+				{
+					<span style=color:#66d9ef>this</span>.err = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;{0} is not in the dictionary.&#34;</span>, words[i]);
+					<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+				}
+				array[i] = num2;
+				<span style=color:#66d9ef>if</span> (i &gt; <span style=color:#ae81ff>0</span> &amp;&amp; num2 % i != <span style=color:#ae81ff>0</span> &amp;&amp; i &lt; words.Length - <span style=color:#ae81ff>1</span>)
+				{
+					<span style=color:#66d9ef>this</span>.err = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;{0} is not indexed correctly.&#34;</span>, words[i]);
+					<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+				}
+				<span style=color:#66d9ef>if</span> (i &gt; <span style=color:#ae81ff>0</span> &amp;&amp; num2 % array2[i] != <span style=color:#ae81ff>0</span> &amp;&amp; i &lt; words.Length - <span style=color:#ae81ff>1</span>)
+				{
+					<span style=color:#66d9ef>this</span>.err = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;{0} is not indexed correctly!&#34;</span>, words[i]);
+					<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+				}
+				num ^= num2;
+			}
+			<span style=color:#66d9ef>if</span> (num != <span style=color:#ae81ff>0</span>)
+			{
+				<span style=color:#66d9ef>this</span>.err = <span style=color:#e6db74>&#34;Check word does not match.&#34;</span>;
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+			}
+			<span style=color:#66d9ef>return</span> array;
+		}
+</code></pre></div><p>Well, ,this seems an interesting function.</p><p>So we see that an object of a class <code>Wordlist</code> is initialized and a new array of size equal to the size of the keyword array in also initialized. There is another array containing few numbers as well.</p><p>Alright let&rsquo;s see what the <code>Wordlist</code> can contain</p><h3 id=class-wordlist>Class <code>Wordlist</code><a href=#class-wordlist class=hanchor arialabel=Anchor>&#8983;</a></h3><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%206.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%206.png></p><p>Since the function seems pretty easy enough, without going into too much detail I shall explain this part.</p><p>This constructor and all the other member function is responsible for getting a resource from a resource file <code>english.txt</code> from which every word in it is split up and stored into a dictionary which with <code>key = word from the file</code> and <code>value = index of the array from 0</code> . Easy enough!</p><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%207.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%207.png></p><p><code>english.txt</code> resource file ^^</p><hr><p>So getting back to the previous function <code>wordsToInts</code> . We can see that a loop runs till the length of the keyword array.</p><p>The <code>num2</code> for each iteration will contain the index of the word(input) in the dictionary.</p><p>This is stored into the newly created array <code>array</code>.</p><p>Let&rsquo;s see what the checks are [note that the check doesn&rsquo;t matter for i>0 and i&lt;4],</p><ul><li>Every index of the word we found in the dict mod with the countershould result in 0</li><li>Every index of the word we found in the dict mod with the number in the <code>array2[i]</code> should result in 0</li><li>And mainly, every index xored starting from the number 85 must result in 0</li></ul><p>Alright, this is getting pretty complicated. So how do we pass these checks?</p><p>We know the first word that is passed, which is &ldquo;system&rdquo; (check above for the explanation). The index of the first word is <code>1766</code> . So, let&rsquo;s keep that in our mind as well.</p><p>Now, what we want is, the index of the rest of the four words in our input such that it satisfies all these conditions and we get the flag (or so i thought till&mldr;)</p><p>Assuming that we get the right index, we understand that new <code>array</code> will contain the 5 correct index which passes all these checks.</p><p>We come across the next loop in the function <code>runCheck()</code> after the call to <code>wordsToInts()</code></p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>int</span>[] array = <span style=color:#66d9ef>this</span>.wordsToInts(<span style=color:#66d9ef>this</span>.keywords);
+			<span style=color:#66d9ef>if</span> (array == <span style=color:#66d9ef>null</span>)
+			{
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>;
+			}
+			<span style=color:#66d9ef>this</span>.keyBytes = <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>byte</span>[array.Length * <span style=color:#ae81ff>4</span>];
+			<span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i = <span style=color:#ae81ff>0</span>; i &lt; array.Length; i++)
+			{
+				BitConverter.GetBytes(array[i]).CopyTo(<span style=color:#66d9ef>this</span>.keyBytes, i * <span style=color:#ae81ff>4</span>);
+			}
+			<span style=color:#66d9ef>this</span>.success = <span style=color:#66d9ef>true</span>;
+			<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.success;
+</code></pre></div><p>There is a initializing of a new bytearray with the size as <code>5 * 4</code> . The loop converts each of those index into equivalent bytearray and stores into <code>keyBytes</code></p><p>example,</p><p>If we have a the index in hex as, <code>[0x6e6, 0x3e5, 0x434, 0x6b5, 0x3cc]</code> , then the bytearray will contain, <code>[e6, 06, 00, 00, e5, 03, 00, 00, 34, 04, 00, 00, b5, 06, 00, 00, cc, 03, 00, 00]</code> . Essentially, the bytearray converts the hex to a 4 byte array.</p><p>So, all good and logical till now I hope!</p><p>So, once all these checks are passed and we get this new bytearray formed from the right index of the words from the dict, then the function <code>runChec()</code> returns True.</p><p>This is what is passed onto the <code>Crypter</code> class constructor inside the <code>activate_btn_Clic()</code> function,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp>Crypter crypter = <span style=color:#66d9ef>new</span> Crypter(keyCheck.KeyBytes);
+			<span style=color:#66d9ef>if</span> (!crypter.checkKeyId(KeygenForm.keyId))
+			{
+				<span style=color:#66d9ef>this</span>.results_text.Text = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;Invalid KeyID for this build.&#34;</span>, <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>object</span>[<span style=color:#ae81ff>0</span>]);
+				<span style=color:#66d9ef>return</span>;
+			}
+</code></pre></div><p>Let&rsquo;s see what the constructor does.</p><h1 id=class-crypter>Class <code>Crypter</code><a href=#class-crypter class=hanchor arialabel=Anchor>&#8983;</a></h1><h2 id=constructor--public-crypterbyte-rawkey>Constructor — <code>public Crypter(byte[] rawkey)</code><a href=#constructor--public-crypterbyte-rawkey class=hanchor arialabel=Anchor>&#8983;</a></h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>public</span> Crypter(<span style=color:#66d9ef>byte</span>[] rawkey)
+		{
+			SHA256 sha = SHA256.Create();
+			<span style=color:#66d9ef>this</span>.keyBytes = sha.ComputeHash(rawkey);
+		}
+</code></pre></div><p>The bytearray is passed onto the constructor and it creates another attribute <code>keyBytes</code> which contains the sha256 hash of the bytearray.</p><p>Next is the <code>checkKeyId()</code> function which has the parameter as the encoded hash <code>keyid</code>(mentioned above)</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>readonly</span> <span style=color:#66d9ef>string</span> keyId = <span style=color:#e6db74>&#34;ed2591b6660b2b05a0e5b22152b120cd59458eb2504c529927ff9a4890b6912e&#34;</span>;
+</code></pre></div><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>bool</span> checkKeyId(<span style=color:#66d9ef>string</span> keyid)
+		{
+			<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>this</span>.getKeyID() == keyid;
+		}
+</code></pre></div><p>Well, it calls another function <code>getKeyID()</code> and the returned value is checked with the passed hash.</p><h2 id=getkeyid><code>getKeyID()</code><a href=#getkeyid class=hanchor arialabel=Anchor>&#8983;</a></h2><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>string</span> getKeyID()
+		{
+			<span style=color:#66d9ef>byte</span>[] array = SHA256.Create().ComputeHash(<span style=color:#66d9ef>this</span>.keyBytes);
+			StringBuilder stringBuilder = <span style=color:#66d9ef>new</span> StringBuilder();
+			<span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i = <span style=color:#ae81ff>0</span>; i &lt; array.Length; i++)
+			{
+				stringBuilder.Append(array[i].ToString(<span style=color:#e6db74>&#34;x2&#34;</span>));
+			}
+			<span style=color:#66d9ef>return</span> stringBuilder.ToString();
+		}
+</code></pre></div><blockquote><p>Note: The <code>keyBytes</code> mentioned in this code is the data member of this class, which contains the sha256 hash of the bytearray formed from the index of the keywords(check above for explanation)</p></blockquote><p>This function takes in the hash we got before — which is stored in <code>keyBytes</code> — and hashes it again : \</p><p>Then the resulting hash which is in bytearray is converted to a string and returned.</p><p>So, the summary of what happened till now is,</p><ul><li>Supply 5 words with the first word being &ldquo;system&rdquo;</li><li>Find the index of the words inside the wordlist and store it in a separate array</li><li>Check the index with certain conditions</li><li>Convert index to bytearray</li><li>sha256 hash it once</li><li>sha256 hash it again</li><li>Check it with the encoded hash value <code>ed2591b6660b2b05a0e5b22152b120cd59458eb2504c529927ff9a4890b6912e</code></li></ul><p>Phew! That was fun! So, then we can see what we want to achieve in order to get the hash right!</p><p>Now to answer the previous question, Why can&rsquo;t we patch all these and bypass these checks to get to the decryption routine?</p><h1 id=decryption-routine-decrypthexstring>Decryption routine, <code>decryptHexString()</code><a href=#decryption-routine-decrypthexstring class=hanchor arialabel=Anchor>&#8983;</a></h1><p>The answer,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>string</span> text = crypter.decryptHexString(<span style=color:#66d9ef>this</span>.secret_text.Text);
+</code></pre></div><p>The function <code>decryptHexString</code> is called with the parameter <code>secret_text.Text</code> which contains,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>this</span>.secret_text.Text = <span style=color:#e6db74>&#34;294b0bee12606b1a8c611727318d7240cfc8c780a386c35758bcaa9e3b181e47&#34;</span>;
+</code></pre></div><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>string</span> decryptHexString(<span style=color:#66d9ef>string</span> ctext)
+		{
+			<span style=color:#66d9ef>byte</span>[] buffer = Crypter.decodeHex(ctext);
+			Aes aes = <span style=color:#66d9ef>this</span>.buildCip();
+			<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> StreamReader(<span style=color:#66d9ef>new</span> CryptoStream(<span style=color:#66d9ef>new</span> MemoryStream(buffer), aes.CreateDecryptor(), CryptoStreamMode.Read)).ReadToEnd();
+		}
+</code></pre></div><p>The hex is converted to a bytearray and an AES routine is called, let&rsquo;s see what the AES routine contains,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> Aes buildCip()
+		{
+			Aes aes = Aes.Create();
+			aes.Key = <span style=color:#66d9ef>this</span>.keyBytes;
+			aes.IV = <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>byte</span>[<span style=color:#ae81ff>16</span>];
+			<span style=color:#66d9ef>return</span> aes;
+		}
+</code></pre></div><p>We see that the <code>aes.key</code> is <code>keyBytes</code> of this class, which actually contains the first hash that we generated from our bytearray which we formed from the index of the words in the dict.</p><p>So, essentially, we need the right index no matter what to get the AES key right!</p><p>Therefore, can&rsquo;t patch it!</p><p>Now, onto the real solution.</p><h1 id=solution>Solution<a href=#solution class=hanchor arialabel=Anchor>&#8983;</a></h1><p>Since we understood what all the necessary functions does we can proceed forming the solution.</p><p>We know that we need to get the index right, which will get the hash right and therefore get us the decrypted flag.</p><p>To get the index check to pass, we need to get the these conditions right,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-csharp data-lang=csharp><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>int</span>[] wordsToInts(<span style=color:#66d9ef>string</span>[] words)
+		{
+			Wordlist instance = Wordlist.Instance;
+			<span style=color:#66d9ef>int</span>[] array = <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>int</span>[words.Length];
+			<span style=color:#66d9ef>int</span>[] array2 = <span style=color:#66d9ef>new</span> <span style=color:#66d9ef>int</span>[]
+			{
+				<span style=color:#ae81ff>1</span>,
+				<span style=color:#ae81ff>3</span>,
+				<span style=color:#ae81ff>11</span>,
+				<span style=color:#ae81ff>5</span>,
+				<span style=color:#ae81ff>1</span>
+			};
+			<span style=color:#66d9ef>int</span> num = <span style=color:#ae81ff>85</span>;
+			<span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i = <span style=color:#ae81ff>0</span>; i &lt; words.Length; i++)
+			{
+				<span style=color:#66d9ef>int</span> num2 = instance.wordIndex(words[i]);
+				<span style=color:#66d9ef>if</span> (num2 == -<span style=color:#ae81ff>1</span>)
+				{
+					<span style=color:#66d9ef>this</span>.err = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;{0} is not in the dictionary.&#34;</span>, words[i]);
+					<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+				}
+				array[i] = num2;
+				<span style=color:#66d9ef>if</span> (i &gt; <span style=color:#ae81ff>0</span> &amp;&amp; num2 % i != <span style=color:#ae81ff>0</span> &amp;&amp; i &lt; words.Length - <span style=color:#ae81ff>1</span>)
+				{
+					<span style=color:#66d9ef>this</span>.err = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;{0} is not indexed correctly.&#34;</span>, words[i]);
+					<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+				}
+				<span style=color:#66d9ef>if</span> (i &gt; <span style=color:#ae81ff>0</span> &amp;&amp; num2 % array2[i] != <span style=color:#ae81ff>0</span> &amp;&amp; i &lt; words.Length - <span style=color:#ae81ff>1</span>)
+				{
+					<span style=color:#66d9ef>this</span>.err = <span style=color:#66d9ef>string</span>.Format(<span style=color:#e6db74>&#34;{0} is not indexed correctly!&#34;</span>, words[i]);
+					<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+				}
+				num ^= num2;
+			}
+			<span style=color:#66d9ef>if</span> (num != <span style=color:#ae81ff>0</span>)
+			{
+				<span style=color:#66d9ef>this</span>.err = <span style=color:#e6db74>&#34;Check word does not match.&#34;</span>;
+				<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>null</span>;
+			}
+			<span style=color:#66d9ef>return</span> array;
+		}
+</code></pre></div><p>What do i do? Well, I jump over to making a z3 script! Why? Oh, well i&rsquo;m a noob!</p><p>But guess what? z3 wasn&rsquo;t needed at all and would not be able to solve this within the given time limit of the CTF for sure as well.</p><p><em>p.s. i ran the z3 script for maybe 2 hours reaching 100k SAT models but none which is equal to the hash!</em></p><p><em>z3 script here -</em> solve_z3.py</p><p>Then, I asked my crypto friend <a href=https://github.com/deut-erium>deuterium</a> for help regarding this, and he whipped out a python script in a few minutes! 0_0 I was impressed and surprised at the speed and the logic of the script, crypto peeps are awesome!</p><p>Here is his script,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#f92672>from</span> struct <span style=color:#f92672>import</span> pack
+<span style=color:#f92672>from</span> hashlib <span style=color:#f92672>import</span> sha256
+desired_hash <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;ed2591b6660b2b05a0e5b22152b120cd59458eb2504c529927ff9a4890b6912e&#39;</span>
+<span style=color:#f92672>from</span> tqdm <span style=color:#f92672>import</span> tqdm
+<span style=color:#66d9ef>def</span> <span style=color:#a6e22e>find</span>():
+    num0 <span style=color:#f92672>=</span> <span style=color:#ae81ff>1766</span>
+    <span style=color:#66d9ef>for</span> num1 <span style=color:#f92672>in</span> tqdm(range(<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0x800</span>,<span style=color:#ae81ff>3</span>),total<span style=color:#f92672>=</span>((<span style=color:#ae81ff>0x800</span><span style=color:#f92672>//</span><span style=color:#ae81ff>3</span>)<span style=color:#f92672>*</span>(<span style=color:#ae81ff>0x800</span><span style=color:#f92672>//</span><span style=color:#ae81ff>22</span>)<span style=color:#f92672>*</span>(<span style=color:#ae81ff>0x800</span><span style=color:#f92672>//</span><span style=color:#ae81ff>15</span>))):
+        <span style=color:#66d9ef>for</span> num2 <span style=color:#f92672>in</span> range(<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0x800</span>,<span style=color:#ae81ff>22</span>):
+            <span style=color:#66d9ef>for</span> num3 <span style=color:#f92672>in</span> range(<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0x800</span>,<span style=color:#ae81ff>15</span>):
+                num4 <span style=color:#f92672>=</span> <span style=color:#ae81ff>85</span><span style=color:#f92672>^</span><span style=color:#ae81ff>1766</span><span style=color:#f92672>^</span>num1<span style=color:#f92672>^</span>num2<span style=color:#f92672>^</span>num3
+                <span style=color:#66d9ef>if</span> num4 <span style=color:#f92672>in</span> range(<span style=color:#ae81ff>0</span>,<span style=color:#ae81ff>0x800</span>):
+                    word <span style=color:#f92672>=</span> pack(<span style=color:#e6db74>&#39;&lt;5I&#39;</span>,num0,num1,num2,num3,num4)
+                    <span style=color:#66d9ef>if</span> sha256(sha256(word)<span style=color:#f92672>.</span>digest())<span style=color:#f92672>.</span>hexdigest() <span style=color:#f92672>==</span> desired_hash:
+                        <span style=color:#66d9ef>print</span>(num0,num1,num2,num3,num4)
+                        <span style=color:#66d9ef>return</span> num0,num1,num2,num3,num4
+
+find()
+</code></pre></div><p>Running this gives us the right index,</p><p><code>1766 1263 1210 15 1769</code> which gives us this combination of words <code>system over nuclear acid tag</code></p><p>Inputting this gives us the flag,</p><p><img src=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%208.png alt=/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%208.png></p><p><strong>Flag: <code>CTF{dot_dot_dot_net_dot_net}</code></strong></p></div></div><div class=pagination><div class=pagination__title><span class=pagination__title-h>Read other posts</span><hr></div><div class=pagination__buttons><span class="button previous"><a href=/posts/confirmation-of-identity-htb-finals-2021-57ac016bef444b6c8e0aab996b04fc6b/><span class=button__icon>←</span>
+<span class=button__text>Confirmation of Identity— HTB Finals 2021</span></a></span></div></div></div></div><footer class=footer><div class=footer__inner><div class="copyright copyright--user"><span>© 2020 AmunRha</span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span></div></div></footer><script src=/assets/main.js></script><script src=/assets/prism.js></script></div></body></html>

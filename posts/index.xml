@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on CTF Blog</title><link>/posts/</link><description>Recent content in Posts on CTF Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2020 AmunRha</copyright><lastBuildDate>Sun, 21 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Confirmation of Identity— HTB Finals 2021</title><link>/posts/confirmation-of-identity-htb-finals-2021-57ac016bef444b6c8e0aab996b04fc6b/</link><pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate><guid>/posts/confirmation-of-identity-htb-finals-2021-57ac016bef444b6c8e0aab996b04fc6b/</guid><description>Confirmation of Identity— HTB Finals 2021 Tags: HTBFinals21, patching, reversing, windows
+Writeup by: AmunRha
+Description I wrote this advanced program to only work on my computer but I think I might have made a mistake somewhere, as I can&amp;rsquo;t even confirm my own identity.
+Challenge overview The given binary looks for the registry key where the wallpaper location is being set.
+The registry key is located at HKEY_CURRENT_USER\Control Panel\Desktop\Wallpaper</description><content>&lt;h1 id="confirmation-of-identity-htb-finals-2021">Confirmation of Identity— HTB Finals 2021&lt;/h1>
+&lt;p>Tags: HTBFinals21, patching, reversing, windows&lt;/p>
+&lt;p>Writeup by: AmunRha&lt;/p>
+&lt;h3 id="description">Description&lt;/h3>
+&lt;blockquote>
+&lt;p>I wrote this advanced program to only work on my computer but I think I might have made a mistake somewhere, as I can&amp;rsquo;t even confirm my own identity.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="challenge-overview">Challenge overview&lt;/h3>
+&lt;p>The given binary looks for the registry key where the wallpaper location is being set.&lt;/p>
+&lt;p>The registry key is located at &lt;code>HKEY_CURRENT_USER\Control Panel\Desktop\Wallpaper&lt;/code>&lt;/p>
+&lt;p>This is parsed and split to get the wallpaper name with extension, where extension must be &lt;code>.\proof&lt;/code> . If that is verified the flag is printed out&lt;/p>
+&lt;p>Once all the debugger checks, and the unnecessary instructions are patched out, the binary file would run&lt;/p>
+&lt;h3 id="solution">Solution&lt;/h3>
+&lt;p>We can go the the registry key manually using registry editor in windows and then change the wallpaper name to &lt;code>.proof&lt;/code> which will then get passed onto the parser and split up to reach a &lt;code>strcmp&lt;/code> instruction.&lt;/p>
+&lt;p>The check will then proceed to check if the extension of the wallpaper is actually &lt;code>\proof&lt;/code>&lt;/p>
+&lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled.png">&lt;/p>
+&lt;p>But since we cannot supply &lt;code>\&lt;/code> inside the registry directly as &lt;code>wallpaper_pic.\proof&lt;/code> due to the parser demanding the wallpaper name then the extension&lt;/p>
+&lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%201.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%201.png">&lt;/p>
+&lt;p>First the words are split based on the &lt;code>\&lt;/code>&lt;/p>
+&lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%202.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%202.png">&lt;/p>
+&lt;p>Second, the word is split based on the &lt;code>.&lt;/code>&lt;/p>
+&lt;p>Reading the assembly instruction we come across a particular instruction which doesnt make sense initially,&lt;/p>
+&lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%203.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%203.png">&lt;/p>
+&lt;p>&lt;code>byte ptr [edx+ecx]&lt;/code> points to the character just before &lt;code>proof&lt;/code> in the memory&lt;/p>
+&lt;p>So, rather than going into the debugger then changing the memory just after &lt;code>strcmp&lt;/code> and this particular instruction which will nullify the character before &lt;code>proof&lt;/code> . We can just patch that byte to store &lt;code>\&lt;/code> onto that pointed memory.&lt;/p>
+&lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%204.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%204.png">&lt;/p>
+&lt;p>Patching the byte to store the character &lt;code>\&lt;/code>&lt;/p>
+&lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%205.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%205.png">&lt;/p>
+&lt;p>Proof of patch shown at the dump once the patched instruction gets executed&lt;/p>
+&lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%206.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%206.png">&lt;/p>
+&lt;p>This will pass the above check from the binary hence proceeding over to printing the success message and the flag.&lt;/p>
+&lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%207.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%207.png">&lt;/p>
+&lt;p>&lt;strong>Flag: &lt;code>HTB{Id3nt1ty_c0nf1rmat1on}&lt;/code>&lt;/strong>&lt;/p>
+&lt;p>&lt;strong>Note&lt;/strong>: There are other patches applied which are specific for the debugger. The only one patch that is required to make the binary work is the above mentioned one. The other patches with respective to the debugger are &lt;code>int3&lt;/code> instruction, &lt;code>cmp&lt;/code> instruction after every debugger check functions.&lt;/p></content></item><item><title>dotNET Reversing | KeyGenMe | BsidesSF CTF 2021</title><link>/posts/dotnet-reversing-bsidessf-ctf-2021/</link><pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate><guid>/posts/dotnet-reversing-bsidessf-ctf-2021/</guid><description>dotNET Reversing | KeyGenMe | BsidesSF CTF 2021 Tags: bsidesSF21, crypto, dotNET, reversing
+Writeup by: AmunRha
+This was a nice challenge which didn&amp;rsquo;t have too much complexity but seemed interesting at the same time! I solved this challenge with the help of my crypto friend deuterium. This was a rather a different dotNET reversing challenge that I have done till now. This actually had something to reverse xD
+So lets get started with the challenge.</description><content>&lt;h1 id="dotnet-reversing--keygenme--bsidessf-ctf-2021">dotNET Reversing | KeyGenMe | BsidesSF CTF 2021&lt;/h1>
+&lt;p>Tags: bsidesSF21, crypto, dotNET, reversing&lt;/p>
+&lt;p>Writeup by: AmunRha&lt;/p>
+&lt;p>This was a nice challenge which didn&amp;rsquo;t have too much complexity but seemed interesting at the same time! I solved this challenge with the help of my crypto friend &lt;a href="https://github.com/deut-erium">deuterium&lt;/a>. This was a rather a different dotNET reversing challenge that I have done till now. This actually had something to reverse xD&lt;/p>
+&lt;p>So lets get started with the challenge.&lt;/p>
+&lt;h1 id="intro">Intro&lt;/h1>
+&lt;p>Running the executable shows us this window,&lt;/p>
+&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled.png">&lt;/p>
+&lt;p>Since this a dotNET reversing challenge, fire up dnSpy and start to decompile the functions.&lt;/p>
+&lt;p>We can see that there are 6 major functions in the given executable file.&lt;/p>
+&lt;p>The main function is where it always starts, so lets check that.&lt;/p>
+&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%201.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%201.png">&lt;/p>
+&lt;p>There is a call to &lt;code>KeygenForm()&lt;/code> which calls its constructor, which further has a call to &lt;code>InitializeComponent()&lt;/code>.&lt;/p>
+&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%202.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%202.png">&lt;/p>
+&lt;p>Well we can definitely see that it initializes a lot of things. Keeping this in our mind we proceed to check the other functions.&lt;/p>
+&lt;p>We find that the &lt;code>activate_btn_Click()&lt;/code> function is where the program&amp;rsquo;s core logic is starting at.&lt;/p>
+&lt;h1 id="activate_btn_click">&lt;code>activate_btn_Click()&lt;/code>&lt;/h1>
+&lt;p>Let&amp;rsquo;s run through what it does.&lt;/p>
+&lt;p>So, we see that our input is stored inside &lt;code>this.key_input.Text&lt;/code> which is passed as a parameter to the constructor of the class &lt;code>keyCheck&lt;/code>&lt;/p>
+&lt;p>Then we see that another function &lt;code>keyCheck.Success&lt;/code> is called and the result is checked as well.&lt;/p>
+&lt;p>Alright, then it has some kind of attribute &lt;code>keyCheck.KeyBytes&lt;/code> which is passed as a parameter to the constructor of the class &lt;code>Crypter&lt;/code> . Then the result of the function &lt;code>crypter.checkKeyId()&lt;/code> is checked.&lt;/p>
+&lt;p>But wait, we see there is a new parameter here called &lt;code>KeygenForm.keyId&lt;/code> . Let&amp;rsquo;s see what that contains,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">readonly&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span> keyId = &lt;span style="color:#e6db74">&amp;#34;ed2591b6660b2b05a0e5b22152b120cd59458eb2504c529927ff9a4890b6912e&amp;#34;&lt;/span>;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%203.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%203.png">&lt;/p>
+&lt;p>Alright, seems some kind of hash. Depending upon the result returned, the Fail condition will be printed out or the decryption algorithm will run giving us the flag.&lt;/p>
+&lt;p>Alright, seems fairly easy enough. Why can&amp;rsquo;t we just bypass all these checks and run over to the decryption routine? Good idea, but won&amp;rsquo;t work. We will get to know why once I explain the other functions.&lt;/p>
+&lt;p>So we kind of can make sense of what is happening,&lt;/p>
+&lt;ul>
+&lt;li>Get input and format it&lt;/li>
+&lt;li>Check with the &lt;code>success&lt;/code> function&lt;/li>
+&lt;li>Check with the &lt;code>crypter&lt;/code> functions&lt;/li>
+&lt;li>Run the decryption routine&lt;/li>
+&lt;/ul>
+&lt;p>Let&amp;rsquo;s run over function calls, tracking what happens to our input then.&lt;/p>
+&lt;h1 id="keycheck">&lt;code>KeyCheck&lt;/code>&lt;/h1>
+&lt;h2 id="constructor--public-keycheckstring-keystr">Constructor — &lt;code>public KeyCheck(string keyStr)&lt;/code>&lt;/h2>
+&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%204.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%204.png">&lt;/p>
+&lt;p>We see the constructor, we can immediately notice that the constructor takes our input and trims it off the newline characters at the start and the end.&lt;/p>
+&lt;p>Then it splits the input with the delimiter as space — &lt;code>new char[0]&lt;/code> — and then iterates over the array converting all the words in the array to lower case [this means it doesn&amp;rsquo;t matter if the input is of upper case or lower case letters].&lt;/p>
+&lt;p>This new list of words are stored into the class member &lt;code>keywords&lt;/code>&lt;/p>
+&lt;p>Next, we see the call to &lt;code>keyCheck.Success&lt;/code> in the parent function we came from,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> activate_btn_Click(&lt;span style="color:#66d9ef">object&lt;/span> sender, EventArgs e)
+{
+KeyCheck keyCheck = &lt;span style="color:#66d9ef">new&lt;/span> KeyCheck(&lt;span style="color:#66d9ef">this&lt;/span>.key_input.Text);
+&lt;span style="color:#66d9ef">this&lt;/span>.resultsBox.Visible = &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;span style="color:#66d9ef">this&lt;/span>.flag_label.Visible = &lt;span style="color:#66d9ef">false&lt;/span>;
+&lt;span style="color:#66d9ef">if&lt;/span> (!keyCheck.Success)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.results_text.Text = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;Failed: {0}&amp;#34;&lt;/span>, keyCheck.Error);
+&lt;span style="color:#66d9ef">return&lt;/span>;
+}
+Crypter crypter = &lt;span style="color:#66d9ef">new&lt;/span> Crypter(keyCheck.KeyBytes);
+&lt;span style="color:#66d9ef">if&lt;/span> (!crypter.checkKeyId(KeygenForm.keyId))
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.results_text.Text = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;Invalid KeyID for this build.&amp;#34;&lt;/span>, &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">object&lt;/span>[&lt;span style="color:#ae81ff">0&lt;/span>]);
+&lt;span style="color:#66d9ef">return&lt;/span>;
+}
+&lt;span style="color:#66d9ef">string&lt;/span> text = crypter.decryptHexString(&lt;span style="color:#66d9ef">this&lt;/span>.secret_text.Text);
+&lt;span style="color:#66d9ef">this&lt;/span>.flag_label.Text = text;
+&lt;span style="color:#66d9ef">this&lt;/span>.flag_label.Visible = &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;span style="color:#66d9ef">this&lt;/span>.results_text.Text = &lt;span style="color:#e6db74">&amp;#34;Product unlocked.&amp;#34;&lt;/span>;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="keychecksuccess">&lt;code>keyCheck.Success&lt;/code>&lt;/h2>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> Success
+{
+&lt;span style="color:#66d9ef">get&lt;/span>
+{
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>.runCheck();
+}
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>It seems to call and return the result of another member function &lt;code>runCheck()&lt;/code> .&lt;/p>
+&lt;p>Alright let&amp;rsquo;s head over to that then.&lt;/p>
+&lt;h2 id="runcheck">&lt;code>runCheck()&lt;/code>&lt;/h2>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> runCheck()
+{
+&lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#66d9ef">this&lt;/span>.resChecked)
+{
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>.success;
+}
+&lt;span style="color:#66d9ef">this&lt;/span>.resChecked = &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#66d9ef">this&lt;/span>.keywords == &lt;span style="color:#66d9ef">null&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#e6db74">&amp;#34;No key provided.&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>;
+}
+&lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#66d9ef">this&lt;/span>.keywords[&lt;span style="color:#ae81ff">0&lt;/span>] != KeyCheck.keyIdentifier)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#e6db74">&amp;#34;Wrong key identifier.&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>;
+}
+&lt;span style="color:#66d9ef">if&lt;/span> (&lt;span style="color:#66d9ef">this&lt;/span>.keywords.Length != KeyCheck.strength)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#e6db74">&amp;#34;Incorrect key strength.&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>;
+}
+&lt;span style="color:#66d9ef">if&lt;/span> (!&lt;span style="color:#66d9ef">this&lt;/span>.dupeCheck())
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#e6db74">&amp;#34;Duplicate key pieces.&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>;
+}
+&lt;span style="color:#66d9ef">int&lt;/span>[] array = &lt;span style="color:#66d9ef">this&lt;/span>.wordsToInts(&lt;span style="color:#66d9ef">this&lt;/span>.keywords);
+&lt;span style="color:#66d9ef">if&lt;/span> (array == &lt;span style="color:#66d9ef">null&lt;/span>)
+{
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>;
+}
+&lt;span style="color:#66d9ef">this&lt;/span>.keyBytes = &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">byte&lt;/span>[array.Length * &lt;span style="color:#ae81ff">4&lt;/span>];
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i = &lt;span style="color:#ae81ff">0&lt;/span>; i &amp;lt; array.Length; i++)
+{
+BitConverter.GetBytes(array[i]).CopyTo(&lt;span style="color:#66d9ef">this&lt;/span>.keyBytes, i * &lt;span style="color:#ae81ff">4&lt;/span>);
+}
+&lt;span style="color:#66d9ef">this&lt;/span>.success = &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>.success;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The function runs over a few checks with our input (stored as a list of words in &lt;code>keywords&lt;/code>)&lt;/p>
+&lt;p>So, let&amp;rsquo;s try to pass all these checks one by one with the explanation,&lt;/p>
+&lt;ul>
+&lt;li>The list of words must not be empty — Well, the check is self explanatory&lt;/li>
+&lt;li>The first word in the list must be equal to &lt;code>keyCheck.keyIdentifier&lt;/code> , which is &amp;ldquo;system&amp;rdquo;,&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">readonly&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span> keyIdentifier = &lt;span style="color:#e6db74">&amp;#34;system&amp;#34;&lt;/span>;
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>The length of the array must be equal to &lt;code>KeyCheck.strength&lt;/code> , which is 5 — 5 words in total then&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">readonly&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> strength = &lt;span style="color:#ae81ff">5&lt;/span>;
+&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>All words in the input must be unique — The error code is self explanatory for this, no need to check the code xD&lt;/li>
+&lt;/ul>
+&lt;blockquote>
+&lt;p>This function and the previous function gives us the way on how the input must be supplied, which is,
+&lt;code>system word1 word2 word3 word4&lt;/code>&lt;/p>
+&lt;/blockquote>
+&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%205.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%205.png">&lt;/p>
+&lt;p>So once we do all these we see a new function called &lt;code>wordsToInts()&lt;/code> being called with the list as the parameter.&lt;/p>
+&lt;p>Let&amp;rsquo;s see what that does.&lt;/p>
+&lt;h2 id="wordstoints">&lt;code>wordsToInts()&lt;/code>&lt;/h2>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>[] wordsToInts(&lt;span style="color:#66d9ef">string&lt;/span>[] words)
+{
+Wordlist instance = Wordlist.Instance;
+&lt;span style="color:#66d9ef">int&lt;/span>[] array = &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>[words.Length];
+&lt;span style="color:#66d9ef">int&lt;/span>[] array2 = &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>[]
+{
+&lt;span style="color:#ae81ff">1&lt;/span>,
+&lt;span style="color:#ae81ff">3&lt;/span>,
+&lt;span style="color:#ae81ff">11&lt;/span>,
+&lt;span style="color:#ae81ff">5&lt;/span>,
+&lt;span style="color:#ae81ff">1&lt;/span>
+};
+&lt;span style="color:#66d9ef">int&lt;/span> num = &lt;span style="color:#ae81ff">85&lt;/span>;
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i = &lt;span style="color:#ae81ff">0&lt;/span>; i &amp;lt; words.Length; i++)
+{
+&lt;span style="color:#66d9ef">int&lt;/span> num2 = instance.wordIndex(words[i]);
+&lt;span style="color:#66d9ef">if&lt;/span> (num2 == -&lt;span style="color:#ae81ff">1&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;{0} is not in the dictionary.&amp;#34;&lt;/span>, words[i]);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+}
+array[i] = num2;
+&lt;span style="color:#66d9ef">if&lt;/span> (i &amp;gt; &lt;span style="color:#ae81ff">0&lt;/span> &amp;amp;&amp;amp; num2 % i != &lt;span style="color:#ae81ff">0&lt;/span> &amp;amp;&amp;amp; i &amp;lt; words.Length - &lt;span style="color:#ae81ff">1&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;{0} is not indexed correctly.&amp;#34;&lt;/span>, words[i]);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+}
+&lt;span style="color:#66d9ef">if&lt;/span> (i &amp;gt; &lt;span style="color:#ae81ff">0&lt;/span> &amp;amp;&amp;amp; num2 % array2[i] != &lt;span style="color:#ae81ff">0&lt;/span> &amp;amp;&amp;amp; i &amp;lt; words.Length - &lt;span style="color:#ae81ff">1&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;{0} is not indexed correctly!&amp;#34;&lt;/span>, words[i]);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+}
+num ^= num2;
+}
+&lt;span style="color:#66d9ef">if&lt;/span> (num != &lt;span style="color:#ae81ff">0&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#e6db74">&amp;#34;Check word does not match.&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+}
+&lt;span style="color:#66d9ef">return&lt;/span> array;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Well, ,this seems an interesting function.&lt;/p>
+&lt;p>So we see that an object of a class &lt;code>Wordlist&lt;/code> is initialized and a new array of size equal to the size of the keyword array in also initialized. There is another array containing few numbers as well.&lt;/p>
+&lt;p>Alright let&amp;rsquo;s see what the &lt;code>Wordlist&lt;/code> can contain&lt;/p>
+&lt;h3 id="class-wordlist">Class &lt;code>Wordlist&lt;/code>&lt;/h3>
+&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%206.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%206.png">&lt;/p>
+&lt;p>Since the function seems pretty easy enough, without going into too much detail I shall explain this part.&lt;/p>
+&lt;p>This constructor and all the other member function is responsible for getting a resource from a resource file &lt;code>english.txt&lt;/code> from which every word in it is split up and stored into a dictionary which with &lt;code>key = word from the file&lt;/code> and &lt;code>value = index of the array from 0&lt;/code> . Easy enough!&lt;/p>
+&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%207.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%207.png">&lt;/p>
+&lt;p>&lt;code>english.txt&lt;/code> resource file ^^&lt;/p>
+&lt;hr>
+&lt;p>So getting back to the previous function &lt;code>wordsToInts&lt;/code> . We can see that a loop runs till the length of the keyword array.&lt;/p>
+&lt;p>The &lt;code>num2&lt;/code> for each iteration will contain the index of the word(input) in the dictionary.&lt;/p>
+&lt;p>This is stored into the newly created array &lt;code>array&lt;/code>.&lt;/p>
+&lt;p>Let&amp;rsquo;s see what the checks are [note that the check doesn&amp;rsquo;t matter for i&amp;gt;0 and i&amp;lt;4],&lt;/p>
+&lt;ul>
+&lt;li>Every index of the word we found in the dict mod with the countershould result in 0&lt;/li>
+&lt;li>Every index of the word we found in the dict mod with the number in the &lt;code>array2[i]&lt;/code> should result in 0&lt;/li>
+&lt;li>And mainly, every index xored starting from the number 85 must result in 0&lt;/li>
+&lt;/ul>
+&lt;p>Alright, this is getting pretty complicated. So how do we pass these checks?&lt;/p>
+&lt;p>We know the first word that is passed, which is &amp;ldquo;system&amp;rdquo; (check above for the explanation). The index of the first word is &lt;code>1766&lt;/code> . So, let&amp;rsquo;s keep that in our mind as well.&lt;/p>
+&lt;p>Now, what we want is, the index of the rest of the four words in our input such that it satisfies all these conditions and we get the flag (or so i thought till&amp;hellip;)&lt;/p>
+&lt;p>Assuming that we get the right index, we understand that new &lt;code>array&lt;/code> will contain the 5 correct index which passes all these checks.&lt;/p>
+&lt;p>We come across the next loop in the function &lt;code>runCheck()&lt;/code> after the call to &lt;code>wordsToInts()&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">int&lt;/span>[] array = &lt;span style="color:#66d9ef">this&lt;/span>.wordsToInts(&lt;span style="color:#66d9ef">this&lt;/span>.keywords);
+&lt;span style="color:#66d9ef">if&lt;/span> (array == &lt;span style="color:#66d9ef">null&lt;/span>)
+{
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>;
+}
+&lt;span style="color:#66d9ef">this&lt;/span>.keyBytes = &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">byte&lt;/span>[array.Length * &lt;span style="color:#ae81ff">4&lt;/span>];
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i = &lt;span style="color:#ae81ff">0&lt;/span>; i &amp;lt; array.Length; i++)
+{
+BitConverter.GetBytes(array[i]).CopyTo(&lt;span style="color:#66d9ef">this&lt;/span>.keyBytes, i * &lt;span style="color:#ae81ff">4&lt;/span>);
+}
+&lt;span style="color:#66d9ef">this&lt;/span>.success = &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>.success;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>There is a initializing of a new bytearray with the size as &lt;code>5 * 4&lt;/code> . The loop converts each of those index into equivalent bytearray and stores into &lt;code>keyBytes&lt;/code>&lt;/p>
+&lt;p>example,&lt;/p>
+&lt;p>If we have a the index in hex as, &lt;code>[0x6e6, 0x3e5, 0x434, 0x6b5, 0x3cc]&lt;/code> , then the bytearray will contain, &lt;code>[e6, 06, 00, 00, e5, 03, 00, 00, 34, 04, 00, 00, b5, 06, 00, 00, cc, 03, 00, 00]&lt;/code> . Essentially, the bytearray converts the hex to a 4 byte array.&lt;/p>
+&lt;p>So, all good and logical till now I hope!&lt;/p>
+&lt;p>So, once all these checks are passed and we get this new bytearray formed from the right index of the words from the dict, then the function &lt;code>runChec()&lt;/code> returns True.&lt;/p>
+&lt;p>This is what is passed onto the &lt;code>Crypter&lt;/code> class constructor inside the &lt;code>activate_btn_Clic()&lt;/code> function,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">Crypter crypter = &lt;span style="color:#66d9ef">new&lt;/span> Crypter(keyCheck.KeyBytes);
+&lt;span style="color:#66d9ef">if&lt;/span> (!crypter.checkKeyId(KeygenForm.keyId))
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.results_text.Text = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;Invalid KeyID for this build.&amp;#34;&lt;/span>, &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">object&lt;/span>[&lt;span style="color:#ae81ff">0&lt;/span>]);
+&lt;span style="color:#66d9ef">return&lt;/span>;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Let&amp;rsquo;s see what the constructor does.&lt;/p>
+&lt;h1 id="class-crypter">Class &lt;code>Crypter&lt;/code>&lt;/h1>
+&lt;h2 id="constructor--public-crypterbyte-rawkey">Constructor — &lt;code>public Crypter(byte[] rawkey)&lt;/code>&lt;/h2>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">public&lt;/span> Crypter(&lt;span style="color:#66d9ef">byte&lt;/span>[] rawkey)
+{
+SHA256 sha = SHA256.Create();
+&lt;span style="color:#66d9ef">this&lt;/span>.keyBytes = sha.ComputeHash(rawkey);
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The bytearray is passed onto the constructor and it creates another attribute &lt;code>keyBytes&lt;/code> which contains the sha256 hash of the bytearray.&lt;/p>
+&lt;p>Next is the &lt;code>checkKeyId()&lt;/code> function which has the parameter as the encoded hash &lt;code>keyid&lt;/code>(mentioned above)&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">readonly&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span> keyId = &lt;span style="color:#e6db74">&amp;#34;ed2591b6660b2b05a0e5b22152b120cd59458eb2504c529927ff9a4890b6912e&amp;#34;&lt;/span>;
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> checkKeyId(&lt;span style="color:#66d9ef">string&lt;/span> keyid)
+{
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">this&lt;/span>.getKeyID() == keyid;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Well, it calls another function &lt;code>getKeyID()&lt;/code> and the returned value is checked with the passed hash.&lt;/p>
+&lt;h2 id="getkeyid">&lt;code>getKeyID()&lt;/code>&lt;/h2>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span> getKeyID()
+{
+&lt;span style="color:#66d9ef">byte&lt;/span>[] array = SHA256.Create().ComputeHash(&lt;span style="color:#66d9ef">this&lt;/span>.keyBytes);
+StringBuilder stringBuilder = &lt;span style="color:#66d9ef">new&lt;/span> StringBuilder();
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i = &lt;span style="color:#ae81ff">0&lt;/span>; i &amp;lt; array.Length; i++)
+{
+stringBuilder.Append(array[i].ToString(&lt;span style="color:#e6db74">&amp;#34;x2&amp;#34;&lt;/span>));
+}
+&lt;span style="color:#66d9ef">return&lt;/span> stringBuilder.ToString();
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Note: The &lt;code>keyBytes&lt;/code> mentioned in this code is the data member of this class, which contains the sha256 hash of the bytearray formed from the index of the keywords(check above for explanation)&lt;/p>
+&lt;/blockquote>
+&lt;p>This function takes in the hash we got before — which is stored in &lt;code>keyBytes&lt;/code> — and hashes it again : \&lt;/p>
+&lt;p>Then the resulting hash which is in bytearray is converted to a string and returned.&lt;/p>
+&lt;p>So, the summary of what happened till now is,&lt;/p>
+&lt;ul>
+&lt;li>Supply 5 words with the first word being &amp;ldquo;system&amp;rdquo;&lt;/li>
+&lt;li>Find the index of the words inside the wordlist and store it in a separate array&lt;/li>
+&lt;li>Check the index with certain conditions&lt;/li>
+&lt;li>Convert index to bytearray&lt;/li>
+&lt;li>sha256 hash it once&lt;/li>
+&lt;li>sha256 hash it again&lt;/li>
+&lt;li>Check it with the encoded hash value &lt;code>ed2591b6660b2b05a0e5b22152b120cd59458eb2504c529927ff9a4890b6912e&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>Phew! That was fun! So, then we can see what we want to achieve in order to get the hash right!&lt;/p>
+&lt;p>Now to answer the previous question, Why can&amp;rsquo;t we patch all these and bypass these checks to get to the decryption routine?&lt;/p>
+&lt;h1 id="decryption-routine-decrypthexstring">Decryption routine, &lt;code>decryptHexString()&lt;/code>&lt;/h1>
+&lt;p>The answer,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">string&lt;/span> text = crypter.decryptHexString(&lt;span style="color:#66d9ef">this&lt;/span>.secret_text.Text);
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The function &lt;code>decryptHexString&lt;/code> is called with the parameter &lt;code>secret_text.Text&lt;/code> which contains,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">this&lt;/span>.secret_text.Text = &lt;span style="color:#e6db74">&amp;#34;294b0bee12606b1a8c611727318d7240cfc8c780a386c35758bcaa9e3b181e47&amp;#34;&lt;/span>;
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span> decryptHexString(&lt;span style="color:#66d9ef">string&lt;/span> ctext)
+{
+&lt;span style="color:#66d9ef">byte&lt;/span>[] buffer = Crypter.decodeHex(ctext);
+Aes aes = &lt;span style="color:#66d9ef">this&lt;/span>.buildCip();
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> StreamReader(&lt;span style="color:#66d9ef">new&lt;/span> CryptoStream(&lt;span style="color:#66d9ef">new&lt;/span> MemoryStream(buffer), aes.CreateDecryptor(), CryptoStreamMode.Read)).ReadToEnd();
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>The hex is converted to a bytearray and an AES routine is called, let&amp;rsquo;s see what the AES routine contains,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> Aes buildCip()
+{
+Aes aes = Aes.Create();
+aes.Key = &lt;span style="color:#66d9ef">this&lt;/span>.keyBytes;
+aes.IV = &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">byte&lt;/span>[&lt;span style="color:#ae81ff">16&lt;/span>];
+&lt;span style="color:#66d9ef">return&lt;/span> aes;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>We see that the &lt;code>aes.key&lt;/code> is &lt;code>keyBytes&lt;/code> of this class, which actually contains the first hash that we generated from our bytearray which we formed from the index of the words in the dict.&lt;/p>
+&lt;p>So, essentially, we need the right index no matter what to get the AES key right!&lt;/p>
+&lt;p>Therefore, can&amp;rsquo;t patch it!&lt;/p>
+&lt;p>Now, onto the real solution.&lt;/p>
+&lt;h1 id="solution">Solution&lt;/h1>
+&lt;p>Since we understood what all the necessary functions does we can proceed forming the solution.&lt;/p>
+&lt;p>We know that we need to get the index right, which will get the hash right and therefore get us the decrypted flag.&lt;/p>
+&lt;p>To get the index check to pass, we need to get the these conditions right,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-csharp" data-lang="csharp">&lt;span style="color:#66d9ef">private&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>[] wordsToInts(&lt;span style="color:#66d9ef">string&lt;/span>[] words)
+{
+Wordlist instance = Wordlist.Instance;
+&lt;span style="color:#66d9ef">int&lt;/span>[] array = &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>[words.Length];
+&lt;span style="color:#66d9ef">int&lt;/span>[] array2 = &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>[]
+{
+&lt;span style="color:#ae81ff">1&lt;/span>,
+&lt;span style="color:#ae81ff">3&lt;/span>,
+&lt;span style="color:#ae81ff">11&lt;/span>,
+&lt;span style="color:#ae81ff">5&lt;/span>,
+&lt;span style="color:#ae81ff">1&lt;/span>
+};
+&lt;span style="color:#66d9ef">int&lt;/span> num = &lt;span style="color:#ae81ff">85&lt;/span>;
+&lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i = &lt;span style="color:#ae81ff">0&lt;/span>; i &amp;lt; words.Length; i++)
+{
+&lt;span style="color:#66d9ef">int&lt;/span> num2 = instance.wordIndex(words[i]);
+&lt;span style="color:#66d9ef">if&lt;/span> (num2 == -&lt;span style="color:#ae81ff">1&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;{0} is not in the dictionary.&amp;#34;&lt;/span>, words[i]);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+}
+array[i] = num2;
+&lt;span style="color:#66d9ef">if&lt;/span> (i &amp;gt; &lt;span style="color:#ae81ff">0&lt;/span> &amp;amp;&amp;amp; num2 % i != &lt;span style="color:#ae81ff">0&lt;/span> &amp;amp;&amp;amp; i &amp;lt; words.Length - &lt;span style="color:#ae81ff">1&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;{0} is not indexed correctly.&amp;#34;&lt;/span>, words[i]);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+}
+&lt;span style="color:#66d9ef">if&lt;/span> (i &amp;gt; &lt;span style="color:#ae81ff">0&lt;/span> &amp;amp;&amp;amp; num2 % array2[i] != &lt;span style="color:#ae81ff">0&lt;/span> &amp;amp;&amp;amp; i &amp;lt; words.Length - &lt;span style="color:#ae81ff">1&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#66d9ef">string&lt;/span>.Format(&lt;span style="color:#e6db74">&amp;#34;{0} is not indexed correctly!&amp;#34;&lt;/span>, words[i]);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+}
+num ^= num2;
+}
+&lt;span style="color:#66d9ef">if&lt;/span> (num != &lt;span style="color:#ae81ff">0&lt;/span>)
+{
+&lt;span style="color:#66d9ef">this&lt;/span>.err = &lt;span style="color:#e6db74">&amp;#34;Check word does not match.&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+}
+&lt;span style="color:#66d9ef">return&lt;/span> array;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>What do i do? Well, I jump over to making a z3 script! Why? Oh, well i&amp;rsquo;m a noob!&lt;/p>
+&lt;p>But guess what? z3 wasn&amp;rsquo;t needed at all and would not be able to solve this within the given time limit of the CTF for sure as well.&lt;/p>
+&lt;p>&lt;em>p.s. i ran the z3 script for maybe 2 hours reaching 100k SAT models but none which is equal to the hash!&lt;/em>&lt;/p>
+&lt;p>&lt;em>z3 script here -&lt;/em> solve_z3.py&lt;/p>
+&lt;p>Then, I asked my crypto friend &lt;a href="https://github.com/deut-erium">deuterium&lt;/a> for help regarding this, and he whipped out a python script in a few minutes! 0_0 I was impressed and surprised at the speed and the logic of the script, crypto peeps are awesome!&lt;/p>
+&lt;p>Here is his script,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">from&lt;/span> struct &lt;span style="color:#f92672">import&lt;/span> pack
+&lt;span style="color:#f92672">from&lt;/span> hashlib &lt;span style="color:#f92672">import&lt;/span> sha256
+desired_hash &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;ed2591b6660b2b05a0e5b22152b120cd59458eb2504c529927ff9a4890b6912e&amp;#39;&lt;/span>
+&lt;span style="color:#f92672">from&lt;/span> tqdm &lt;span style="color:#f92672">import&lt;/span> tqdm
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">find&lt;/span>():
+num0 &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1766&lt;/span>
+&lt;span style="color:#66d9ef">for&lt;/span> num1 &lt;span style="color:#f92672">in&lt;/span> tqdm(range(&lt;span style="color:#ae81ff">0&lt;/span>,&lt;span style="color:#ae81ff">0x800&lt;/span>,&lt;span style="color:#ae81ff">3&lt;/span>),total&lt;span style="color:#f92672">=&lt;/span>((&lt;span style="color:#ae81ff">0x800&lt;/span>&lt;span style="color:#f92672">//&lt;/span>&lt;span style="color:#ae81ff">3&lt;/span>)&lt;span style="color:#f92672">*&lt;/span>(&lt;span style="color:#ae81ff">0x800&lt;/span>&lt;span style="color:#f92672">//&lt;/span>&lt;span style="color:#ae81ff">22&lt;/span>)&lt;span style="color:#f92672">*&lt;/span>(&lt;span style="color:#ae81ff">0x800&lt;/span>&lt;span style="color:#f92672">//&lt;/span>&lt;span style="color:#ae81ff">15&lt;/span>))):
+&lt;span style="color:#66d9ef">for&lt;/span> num2 &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">0&lt;/span>,&lt;span style="color:#ae81ff">0x800&lt;/span>,&lt;span style="color:#ae81ff">22&lt;/span>):
+&lt;span style="color:#66d9ef">for&lt;/span> num3 &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">0&lt;/span>,&lt;span style="color:#ae81ff">0x800&lt;/span>,&lt;span style="color:#ae81ff">15&lt;/span>):
+num4 &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">85&lt;/span>&lt;span style="color:#f92672">^&lt;/span>&lt;span style="color:#ae81ff">1766&lt;/span>&lt;span style="color:#f92672">^&lt;/span>num1&lt;span style="color:#f92672">^&lt;/span>num2&lt;span style="color:#f92672">^&lt;/span>num3
+&lt;span style="color:#66d9ef">if&lt;/span> num4 &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">0&lt;/span>,&lt;span style="color:#ae81ff">0x800&lt;/span>):
+word &lt;span style="color:#f92672">=&lt;/span> pack(&lt;span style="color:#e6db74">&amp;#39;&amp;lt;5I&amp;#39;&lt;/span>,num0,num1,num2,num3,num4)
+&lt;span style="color:#66d9ef">if&lt;/span> sha256(sha256(word)&lt;span style="color:#f92672">.&lt;/span>digest())&lt;span style="color:#f92672">.&lt;/span>hexdigest() &lt;span style="color:#f92672">==&lt;/span> desired_hash:
+&lt;span style="color:#66d9ef">print&lt;/span>(num0,num1,num2,num3,num4)
+&lt;span style="color:#66d9ef">return&lt;/span> num0,num1,num2,num3,num4
+find()
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Running this gives us the right index,&lt;/p>
+&lt;p>&lt;code>1766 1263 1210 15 1769&lt;/code> which gives us this combination of words &lt;code>system over nuclear acid tag&lt;/code>&lt;/p>
+&lt;p>Inputting this gives us the flag,&lt;/p>
+&lt;p>&lt;img src="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%208.png" alt="/blogImages/dotNETReversing/KeyGenMe%20-%20BsidesSF%20CTF%202021%204d2290e187df41239be472c660391d64/Untitled%208.png">&lt;/p>
+&lt;p>&lt;strong>Flag: &lt;code>CTF{dot_dot_dot_net_dot_net}&lt;/code>&lt;/strong>&lt;/p></content></item></channel></rss>
