@@ -1,9 +1,140 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on CTF Blog</title><link>/posts/</link><description>Recent content in Posts on CTF Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2020 AmunRha</copyright><lastBuildDate>Sun, 21 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Confirmation of Identity— HTB Finals 2021</title><link>/posts/confirmation-of-identity-htb-finals-2021-57ac016bef444b6c8e0aab996b04fc6b/</link><pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate><guid>/posts/confirmation-of-identity-htb-finals-2021-57ac016bef444b6c8e0aab996b04fc6b/</guid><description>Confirmation of Identity— HTB Finals 2021 Tags: HTBFinals21, patching, reversing, windows
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on CTF Blog</title><link>/posts/</link><description>Recent content in Posts on CTF Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2020 AmunRha</copyright><lastBuildDate>Mon, 17 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Crackme — 3kctf 2021</title><link>/posts/crackme-3kctf-2021-2764fa03cd844a87a4648647049a2cf4/</link><pubDate>Mon, 17 May 2021 00:00:00 +0000</pubDate><guid>/posts/crackme-3kctf-2021-2764fa03cd844a87a4648647049a2cf4/</guid><description>Author: KERRO, Aziz
+Tags: 3kctf21, reversing
+Writeup by: AmunRha
+Description Challenge Overview The challenge is a VM crackme challenge with 4 registers and a location to store data and opcodes.
+Solution Every i+3 from 0 is the VM opcode, and there are around 1215 opcodes.
+Every i+1 and i+2 from 0 is the values which stored inside the registers (which I named as _rax, _rbx) which will be later used for other operations</description><content>&lt;p>Author: KERRO, Aziz&lt;/p>
+&lt;p>Tags: 3kctf21, reversing&lt;/p>
+&lt;p>Writeup by: AmunRha&lt;/p>
+&lt;h3 id="description">Description&lt;/h3>
+&lt;p>&lt;img src="/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled.png" alt="/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled.png">&lt;/p>
+&lt;h3 id="challenge-overview">Challenge Overview&lt;/h3>
+&lt;p>The challenge is a VM crackme challenge with 4 registers and a location to store data and opcodes.&lt;/p>
+&lt;h3 id="solution">Solution&lt;/h3>
+&lt;p>Every i+3 from 0 is the VM opcode, and there are around 1215 opcodes.&lt;/p>
+&lt;p>Every i+1 and i+2 from 0 is the values which stored inside the registers (which I named as _rax, _rbx) which will be later used for other operations&lt;/p>
+&lt;p>&lt;img src="/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%201.png" alt="/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%201.png">&lt;/p>
+&lt;p>The opcode is stored in the bytecode array&lt;/p>
+&lt;p>There are 14 cases in total to be emulated, where most are pretty similar to x86 assembly like, add, sub, xor etc&lt;/p>
+&lt;p>I set up a VM struct in IDA and cleaned up the decompiled code in IDA&lt;/p>
+&lt;p>&lt;img src="/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%202.png" alt="/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%202.png">&lt;/p>
+&lt;p>As we can see, before running every opcode we set the _rax and the _rbx registers to the i+1 and i+2 of the opcode array that we extracted from IDA&lt;/p>
+&lt;p>So, I went ahead and emulated this in python,&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">vm_opcode&lt;/span>():
+i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+k &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;span style="color:#66d9ef">while&lt;/span> i &lt;span style="color:#f92672">&amp;lt;=&lt;/span> &lt;span style="color:#ae81ff">1215&lt;/span>:
+rax &lt;span style="color:#f92672">=&lt;/span> opcode[i&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>]
+rbx &lt;span style="color:#f92672">=&lt;/span> opcode[i&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">2&lt;/span>]
+&lt;span style="color:#66d9ef">if&lt;/span> rax &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span> &lt;span style="color:#f92672">and&lt;/span> rbx &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>:
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rax] &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+rbp[rbx] &lt;span style="color:#f92672">=&lt;/span> rbp[rbx] &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+data[rbx] &lt;span style="color:#f92672">=&lt;/span> data[rbx] &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+print_info(opcode[i], i, rax, rbx)
+&lt;span style="color:#66d9ef">if&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;mul [rbp+{rax}] rbx ; mul {rbp[rax]} {rbx}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rax] &lt;span style="color:#f92672">*&lt;/span> rbx
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;res: {rbp[rax]}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">2&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;sub [rbp+{rax}] rbx ; sub {rbp[rax]} {rbx}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rax] &lt;span style="color:#f92672">-&lt;/span> rbx
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;res: {rbp[rax]}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">3&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;neg [rbp+{rax}] ; {rbp[rax]}&amp;#39;&lt;/span>)
+res &lt;span style="color:#f92672">=&lt;/span> int(tohex(&lt;span style="color:#f92672">~&lt;/span>rbp[rax], &lt;span style="color:#ae81ff">32&lt;/span>), &lt;span style="color:#ae81ff">16&lt;/span>) &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> res
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;res: {rbp[rax]}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">4&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;xor [rbp+{rax}] [data+{rbx}] ; xor {rbp[rax]} {data[rbx]}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rax] &lt;span style="color:#f92672">^&lt;/span> data[rbx]
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;res: {rbp[rax]}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;mov [rbp+{rax}] [rbp+{rbx}] ; mov [rbp+{rax}] {rbp[rbx]}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rbx] &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">6&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;mov [rbp+{rax}] [data+{rbx}] ; mov [rbp+{rax}] {data[rbx]}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> data[rbx] &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">7&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;cmp [rbp+{rbx}], 0 ; cmp {rbp[3]}, 0&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;--&amp;gt; jnz [opcode_list+{i+rax}] ; jnz {i + rax}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">8&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;putc([rbp+{rax}]) &lt;/span>&lt;span style="color:#ae81ff">\t&lt;/span>&lt;span style="color:#e6db74"> ; &lt;/span>&lt;span style="color:#ae81ff">\t&lt;/span>&lt;span style="color:#e6db74"> putc({chr(rbp[rax])})&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">9&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;exit()&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">10&lt;/span>:
+rbp[&lt;span style="color:#ae81ff">0&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> flag[k]
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;getc([rbp+{rax}]) ; char: {k}&amp;#39;&lt;/span>)
+k&lt;span style="color:#f92672">+=&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">11&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;shl [rbp+{rax}] rbx ; shl {rbp[rax]} {rbx}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rax] &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> rbx
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;res: {rbp[rax]}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">12&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;and [rbp+{rax}] [data+{rbx}] ; and {rbp[rax]} {data[rbx]}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rax] &lt;span style="color:#f92672">&amp;amp;&lt;/span> data[rbx]
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;res: {rbp[rax]}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">13&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;or [rbp+{rax}] [data+{rbx}] ; or {rbp[rax]} {data[rbx]}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rax] &lt;span style="color:#f92672">|&lt;/span> data[rbx]
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;res: {rbp[rax]}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">elif&lt;/span> opcode[i] &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">14&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;add [rbp+{rax}] [rbp+{rbx}] ; add {rbp[rax]} {rbp[rbx]}&amp;#39;&lt;/span>)
+rbp[rax] &lt;span style="color:#f92672">=&lt;/span> rbp[rax] &lt;span style="color:#f92672">+&lt;/span> rbp[rbx]
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;res: {rbp[rax]}&amp;#39;&lt;/span>)
+i&lt;span style="color:#f92672">+=&lt;/span>&lt;span style="color:#ae81ff">3&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;em>Forgive the bad code&lt;/em>&lt;/p>
+&lt;p>This will give us a pretty output of the detailed emulated opcodes&lt;/p>
+&lt;p>&lt;img src="/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%203.png" alt="/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%203.png">&lt;/p>
+&lt;p>Reading the opcodes we can find a pattern of encryption and check&lt;/p>
+&lt;p>For every byte, after the encryption is done, the result is stored (mostly added) into the [_rbp+3], if the byte was right, the result will be 0 hence for every right bytes the final result which is moved into the [_rbp+3] will be 0&lt;/p>
+&lt;p>If it is 0 then the check passes, else we fail.&lt;/p>
+&lt;p>There are mainly 4 encryption algos used to check if the flag bytes we sent are the right ones, a few of them can be solved using bruteforce and a few others can be reversed&lt;/p>
+&lt;p>Implementing all the decryption algos and calling them for the respective bytes will give us the right flag bytes.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">decrypt_3&lt;/span>(x):
+x &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">~&lt;/span>x&lt;span style="color:#f92672">&amp;amp;&lt;/span>&lt;span style="color:#ae81ff">0xff&lt;/span>
+&lt;span style="color:#66d9ef">print&lt;/span>(x)
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">decrypt_2&lt;/span>(x, z):
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">128&lt;/span>):
+a &lt;span style="color:#f92672">=&lt;/span> i &lt;span style="color:#f92672">^&lt;/span> x
+b &lt;span style="color:#f92672">=&lt;/span> i &lt;span style="color:#f92672">&amp;amp;&lt;/span> x
+b &lt;span style="color:#f92672">=&lt;/span> b &lt;span style="color:#f92672">&amp;lt;&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>
+c &lt;span style="color:#f92672">=&lt;/span> b
+b &lt;span style="color:#f92672">=&lt;/span> a &lt;span style="color:#f92672">+&lt;/span> b
+b &lt;span style="color:#f92672">=&lt;/span> b &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+c &lt;span style="color:#f92672">=&lt;/span> c &lt;span style="color:#f92672">+&lt;/span> a
+c &lt;span style="color:#f92672">=&lt;/span> c &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+b &lt;span style="color:#f92672">=&lt;/span> b &lt;span style="color:#f92672">&amp;amp;&lt;/span> z
+c &lt;span style="color:#f92672">=&lt;/span> c &lt;span style="color:#f92672">|&lt;/span> z
+b &lt;span style="color:#f92672">=&lt;/span> b &lt;span style="color:#f92672">+&lt;/span> c
+b &lt;span style="color:#f92672">=&lt;/span> b &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xff&lt;/span>
+&lt;span style="color:#66d9ef">if&lt;/span> b &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;FOUND: {i} {chr(i)}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">decrypt_1&lt;/span>(x):
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">128&lt;/span>):
+b &lt;span style="color:#f92672">=&lt;/span> i &lt;span style="color:#f92672">^&lt;/span> x
+b &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">~&lt;/span>b
+a &lt;span style="color:#f92672">=&lt;/span> i
+res &lt;span style="color:#f92672">=&lt;/span> a &lt;span style="color:#f92672">+&lt;/span> b
+&lt;span style="color:#66d9ef">if&lt;/span> res &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;FOUND: {i} {chr(i)}&amp;#39;&lt;/span>)
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">decrypt_0&lt;/span>(x):
+&lt;span style="color:#66d9ef">for&lt;/span> i &lt;span style="color:#f92672">in&lt;/span> range(&lt;span style="color:#ae81ff">128&lt;/span>):
+b &lt;span style="color:#f92672">=&lt;/span> i &lt;span style="color:#f92672">^&lt;/span> x
+a &lt;span style="color:#f92672">=&lt;/span> i &lt;span style="color:#f92672">&amp;amp;&lt;/span> x
+a&lt;span style="color:#f92672">*=&lt;/span>&lt;span style="color:#ae81ff">2&lt;/span>
+res &lt;span style="color:#f92672">=&lt;/span> a &lt;span style="color:#f92672">+&lt;/span> b
+&lt;span style="color:#66d9ef">if&lt;/span> res &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">256&lt;/span>:
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;FOUND: {i} {chr(i)}&amp;#39;&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, working this all out, we get the flag,&lt;/p>
+&lt;p>Flag: &lt;code>ctf{v1rtu4l_m4chine_pr0tection_is_soo_2010_xD}&lt;/code>&lt;/p>
+&lt;p>Output: &lt;a href="https://gist.github.com/AmunRha/8ec3d4184115bdec65c5f883c32d03c9#file-output-txt">output.txt&lt;/a>,&lt;/p>
+&lt;p>Full script,&lt;/p>
+&lt;script type="application/javascript" src="https://gist.github.com/AmunRha/8ec3d4184115bdec65c5f883c32d03c9.js?file=solve_crackme_3kctf21.py">&lt;/script></content></item><item><title>Confirmation of Identity— HTB Finals 2021</title><link>/posts/confirmation-of-identity-htb-finals-2021-57ac016bef444b6c8e0aab996b04fc6b/</link><pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate><guid>/posts/confirmation-of-identity-htb-finals-2021-57ac016bef444b6c8e0aab996b04fc6b/</guid><description>Tags: HTBFinals21, patching, reversing, windows
 Writeup by: AmunRha
 Description I wrote this advanced program to only work on my computer but I think I might have made a mistake somewhere, as I can&amp;rsquo;t even confirm my own identity.
 Challenge overview The given binary looks for the registry key where the wallpaper location is being set.
-The registry key is located at HKEY_CURRENT_USER\Control Panel\Desktop\Wallpaper</description><content>&lt;h1 id="confirmation-of-identity-htb-finals-2021">Confirmation of Identity— HTB Finals 2021&lt;/h1>
-&lt;p>Tags: HTBFinals21, patching, reversing, windows&lt;/p>
+The registry key is located at HKEY_CURRENT_USER\Control Panel\Desktop\Wallpaper
+This is parsed and split to get the wallpaper name with extension, where extension must be .</description><content>&lt;p>Tags: HTBFinals21, patching, reversing, windows&lt;/p>
 &lt;p>Writeup by: AmunRha&lt;/p>
 &lt;h3 id="description">Description&lt;/h3>
 &lt;blockquote>
@@ -35,11 +166,11 @@ The registry key is located at HKEY_CURRENT_USER\Control Panel\Desktop\Wallpaper
 &lt;p>This will pass the above check from the binary hence proceeding over to printing the success message and the flag.&lt;/p>
 &lt;p>&lt;img src="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%207.png" alt="/blogImages/Confirmation%20of%20Identity%E2%80%94%20HTB%20Finals%202021%2057ac016bef444b6c8e0aab996b04fc6b/Untitled%207.png">&lt;/p>
 &lt;p>&lt;strong>Flag: &lt;code>HTB{Id3nt1ty_c0nf1rmat1on}&lt;/code>&lt;/strong>&lt;/p>
-&lt;p>&lt;strong>Note&lt;/strong>: There are other patches applied which are specific for the debugger. The only one patch that is required to make the binary work is the above mentioned one. The other patches with respective to the debugger are &lt;code>int3&lt;/code> instruction, &lt;code>cmp&lt;/code> instruction after every debugger check functions.&lt;/p></content></item><item><title>dotNET Reversing | KeyGenMe | BsidesSF CTF 2021</title><link>/posts/dotnet-reversing-bsidessf-ctf-2021/</link><pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate><guid>/posts/dotnet-reversing-bsidessf-ctf-2021/</guid><description>dotNET Reversing | KeyGenMe | BsidesSF CTF 2021 Tags: bsidesSF21, crypto, dotNET, reversing
+&lt;p>&lt;strong>Note&lt;/strong>: There are other patches applied which are specific for the debugger. The only one patch that is required to make the binary work is the above mentioned one. The other patches with respective to the debugger are &lt;code>int3&lt;/code> instruction, &lt;code>cmp&lt;/code> instruction after every debugger check functions.&lt;/p></content></item><item><title>dotNET Reversing | KeyGenMe | BsidesSF CTF 2021</title><link>/posts/dotnet-reversing-bsidessf-ctf-2021/</link><pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate><guid>/posts/dotnet-reversing-bsidessf-ctf-2021/</guid><description>Tags: bsidesSF21, crypto, dotNET, reversing
 Writeup by: AmunRha
 This was a nice challenge which didn&amp;rsquo;t have too much complexity but seemed interesting at the same time! I solved this challenge with the help of my crypto friend deuterium. This was a rather a different dotNET reversing challenge that I have done till now. This actually had something to reverse xD
-So lets get started with the challenge.</description><content>&lt;h1 id="dotnet-reversing--keygenme--bsidessf-ctf-2021">dotNET Reversing | KeyGenMe | BsidesSF CTF 2021&lt;/h1>
-&lt;p>Tags: bsidesSF21, crypto, dotNET, reversing&lt;/p>
+So lets get started with the challenge.
+Intro Running the executable shows us this window,</description><content>&lt;p>Tags: bsidesSF21, crypto, dotNET, reversing&lt;/p>
 &lt;p>Writeup by: AmunRha&lt;/p>
 &lt;p>This was a nice challenge which didn&amp;rsquo;t have too much complexity but seemed interesting at the same time! I solved this challenge with the help of my crypto friend &lt;a href="https://github.com/deut-erium">deuterium&lt;/a>. This was a rather a different dotNET reversing challenge that I have done till now. This actually had something to reverse xD&lt;/p>
 &lt;p>So lets get started with the challenge.&lt;/p>

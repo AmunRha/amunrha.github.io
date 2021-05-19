@@ -1,0 +1,123 @@
+<!doctype html><html lang=en><head><title>Crackme — 3kctf 2021 :: CTF Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="This was a custom VM based crackme from 3kctf 2021. The VM has simple opcodes and control flow."><meta name=keywords content="[CTF Reverse Engineering Player Wolf WriteUps]"><meta name=robots content="noodp"><link rel=canonical href=/posts/crackme-3kctf-2021-2764fa03cd844a87a4648647049a2cf4/><link rel=stylesheet href=/assets/style.css><link rel=stylesheet href=/assets/red.css><link rel=apple-touch-icon href=/img/apple-touch-icon-192x192.png><link rel="shortcut icon" href=/images/wolf.ico><meta name=twitter:card content="summary"><meta name=twitter:creator content="AmunRha"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="og:title" content="Crackme — 3kctf 2021"><meta property="og:description" content="This was a custom VM based crackme from 3kctf 2021. The VM has simple opcodes and control flow."><meta property="og:url" content="/posts/crackme-3kctf-2021-2764fa03cd844a87a4648647049a2cf4/"><meta property="og:site_name" content="CTF Blog"><meta property="og:image" content="/images/wolf.ico"><meta property="og:image:width" content="2048"><meta property="og:image:height" content="1024"><meta property="article:published_time" content="2021-05-17 00:00:00 +0000 UTC"></head><body class=red><div class="container center headings--one-size"><header class=header><div class=header__inner><div class=header__logo><a href=/><div class=logo>AmunRha's Blog</div></a></div><div class=menu-trigger>menu</div></div><nav class=menu><ul class="menu__inner menu__inner--desktop"><li><a href=/about>About</a></li></ul><ul class="menu__inner menu__inner--mobile"><li><a href=/about>About</a></li></ul></nav></header><div class=content><div class=post><h1 class=post-title><a href=/posts/crackme-3kctf-2021-2764fa03cd844a87a4648647049a2cf4/>Crackme — 3kctf 2021</a></h1><div class=post-meta><span class=post-date>2021-05-17</span>
+<span class=post-author>:: AmunRha</span></div><div class=post-content><div><p>Author: KERRO, Aziz</p><p>Tags: 3kctf21, reversing</p><p>Writeup by: AmunRha</p><h3 id=description>Description<a href=#description class=hanchor arialabel=Anchor>&#8983;</a></h3><p><img src=/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled.png alt=/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled.png></p><h3 id=challenge-overview>Challenge Overview<a href=#challenge-overview class=hanchor arialabel=Anchor>&#8983;</a></h3><p>The challenge is a VM crackme challenge with 4 registers and a location to store data and opcodes.</p><h3 id=solution>Solution<a href=#solution class=hanchor arialabel=Anchor>&#8983;</a></h3><p>Every i+3 from 0 is the VM opcode, and there are around 1215 opcodes.</p><p>Every i+1 and i+2 from 0 is the values which stored inside the registers (which I named as _rax, _rbx) which will be later used for other operations</p><p><img src=/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%201.png alt=/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%201.png></p><p>The opcode is stored in the bytecode array</p><p>There are 14 cases in total to be emulated, where most are pretty similar to x86 assembly like, add, sub, xor etc</p><p>I set up a VM struct in IDA and cleaned up the decompiled code in IDA</p><p><img src=/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%202.png alt=/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%202.png></p><p>As we can see, before running every opcode we set the _rax and the _rbx registers to the i+1 and i+2 of the opcode array that we extracted from IDA</p><p>So, I went ahead and emulated this in python,</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>vm_opcode</span>():
+    i <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+    k <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+
+    <span style=color:#66d9ef>while</span> i <span style=color:#f92672>&lt;=</span> <span style=color:#ae81ff>1215</span>:
+        
+        rax <span style=color:#f92672>=</span> opcode[i<span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>]
+        rbx <span style=color:#f92672>=</span> opcode[i<span style=color:#f92672>+</span><span style=color:#ae81ff>2</span>]
+
+        <span style=color:#66d9ef>if</span> rax <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>4</span> <span style=color:#f92672>and</span> rbx <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>4</span>:
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rax] <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+            rbp[rbx] <span style=color:#f92672>=</span> rbp[rbx] <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+        data[rbx] <span style=color:#f92672>=</span> data[rbx] <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+        
+        print_info(opcode[i], i, rax, rbx)
+
+        <span style=color:#66d9ef>if</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>1</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;mul [rbp+{rax}] rbx  ;  mul {rbp[rax]} {rbx}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rax] <span style=color:#f92672>*</span> rbx
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;res: {rbp[rax]}&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>2</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;sub [rbp+{rax}] rbx  ;  sub {rbp[rax]} {rbx}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rax] <span style=color:#f92672>-</span> rbx
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;res: {rbp[rax]}&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>3</span>:      
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;neg [rbp+{rax}]  ;  {rbp[rax]}&#39;</span>)
+            res <span style=color:#f92672>=</span> int(tohex(<span style=color:#f92672>~</span>rbp[rax], <span style=color:#ae81ff>32</span>), <span style=color:#ae81ff>16</span>) <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+            rbp[rax] <span style=color:#f92672>=</span> res
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;res: {rbp[rax]}&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>4</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;xor [rbp+{rax}] [data+{rbx}]  ;  xor {rbp[rax]} {data[rbx]}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rax] <span style=color:#f92672>^</span> data[rbx]
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;res: {rbp[rax]}&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>5</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;mov [rbp+{rax}] [rbp+{rbx}]  ;  mov [rbp+{rax}] {rbp[rbx]}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rbx] <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>6</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;mov [rbp+{rax}] [data+{rbx}]  ;  mov [rbp+{rax}] {data[rbx]}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> data[rbx] <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>7</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;cmp [rbp+{rbx}], 0           ;  cmp {rbp[3]}, 0&#39;</span>)
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;--&gt; jnz [opcode_list+{i+rax}]  ;  jnz {i + rax}&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>8</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;putc([rbp+{rax}]) </span><span style=color:#ae81ff>\t</span><span style=color:#e6db74>  ;  </span><span style=color:#ae81ff>\t</span><span style=color:#e6db74> putc({chr(rbp[rax])})&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>9</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;exit()&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>10</span>:
+            rbp[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>=</span> flag[k]
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;getc([rbp+{rax}]) ; char: {k}&#39;</span>)
+            k<span style=color:#f92672>+=</span><span style=color:#ae81ff>1</span>
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>11</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;shl [rbp+{rax}] rbx  ;  shl {rbp[rax]} {rbx}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rax] <span style=color:#f92672>&lt;&lt;</span> rbx
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;res: {rbp[rax]}&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>12</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;and [rbp+{rax}] [data+{rbx}]  ;  and {rbp[rax]} {data[rbx]}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rax] <span style=color:#f92672>&amp;</span> data[rbx]
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;res: {rbp[rax]}&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>13</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;or [rbp+{rax}] [data+{rbx}]  ;  or {rbp[rax]} {data[rbx]}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rax] <span style=color:#f92672>|</span> data[rbx]
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;res: {rbp[rax]}&#39;</span>)
+
+        <span style=color:#66d9ef>elif</span> opcode[i] <span style=color:#f92672>==</span> <span style=color:#ae81ff>14</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;add [rbp+{rax}] [rbp+{rbx}]  ;  add {rbp[rax]} {rbp[rbx]}&#39;</span>)
+            rbp[rax] <span style=color:#f92672>=</span> rbp[rax] <span style=color:#f92672>+</span> rbp[rbx]
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;res: {rbp[rax]}&#39;</span>)
+        
+        i<span style=color:#f92672>+=</span><span style=color:#ae81ff>3</span>
+</code></pre></div><p><em>Forgive the bad code</em></p><p>This will give us a pretty output of the detailed emulated opcodes</p><p><img src=/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%203.png alt=/blogImages/Crackme%20%E2%80%94%203kctf%202021%202764fa03cd844a87a4648647049a2cf4/Untitled%203.png></p><p>Reading the opcodes we can find a pattern of encryption and check</p><p>For every byte, after the encryption is done, the result is stored (mostly added) into the [_rbp+3], if the byte was right, the result will be 0 hence for every right bytes the final result which is moved into the [_rbp+3] will be 0</p><p>If it is 0 then the check passes, else we fail.</p><p>There are mainly 4 encryption algos used to check if the flag bytes we sent are the right ones, a few of them can be solved using bruteforce and a few others can be reversed</p><p>Implementing all the decryption algos and calling them for the respective bytes will give us the right flag bytes.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>decrypt_3</span>(x):
+    x <span style=color:#f92672>=</span> <span style=color:#f92672>~</span>x<span style=color:#f92672>&amp;</span><span style=color:#ae81ff>0xff</span>
+    <span style=color:#66d9ef>print</span>(x)
+
+<span style=color:#66d9ef>def</span> <span style=color:#a6e22e>decrypt_2</span>(x, z):
+    <span style=color:#66d9ef>for</span> i <span style=color:#f92672>in</span> range(<span style=color:#ae81ff>128</span>):
+        a <span style=color:#f92672>=</span> i <span style=color:#f92672>^</span> x
+        b <span style=color:#f92672>=</span> i <span style=color:#f92672>&amp;</span> x
+        b <span style=color:#f92672>=</span> b <span style=color:#f92672>&lt;&lt;</span> <span style=color:#ae81ff>1</span>
+        c <span style=color:#f92672>=</span> b
+        b <span style=color:#f92672>=</span> a <span style=color:#f92672>+</span> b
+        b <span style=color:#f92672>=</span> b <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+        c <span style=color:#f92672>=</span> c <span style=color:#f92672>+</span> a
+        c <span style=color:#f92672>=</span> c <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+        b <span style=color:#f92672>=</span> b <span style=color:#f92672>&amp;</span> z
+        c <span style=color:#f92672>=</span> c <span style=color:#f92672>|</span> z
+        b <span style=color:#f92672>=</span> b <span style=color:#f92672>+</span> c
+        b <span style=color:#f92672>=</span> b <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xff</span>
+        <span style=color:#66d9ef>if</span> b <span style=color:#f92672>==</span> <span style=color:#ae81ff>0</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;FOUND: {i} {chr(i)}&#39;</span>)
+
+<span style=color:#66d9ef>def</span> <span style=color:#a6e22e>decrypt_1</span>(x):
+    <span style=color:#66d9ef>for</span> i <span style=color:#f92672>in</span> range(<span style=color:#ae81ff>128</span>):
+        b <span style=color:#f92672>=</span> i <span style=color:#f92672>^</span> x
+        b <span style=color:#f92672>=</span> <span style=color:#f92672>~</span>b
+        a <span style=color:#f92672>=</span> i
+        res <span style=color:#f92672>=</span> a <span style=color:#f92672>+</span> b
+        <span style=color:#66d9ef>if</span> res <span style=color:#f92672>==</span> <span style=color:#ae81ff>0</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;FOUND: {i} {chr(i)}&#39;</span>)
+
+<span style=color:#66d9ef>def</span> <span style=color:#a6e22e>decrypt_0</span>(x):
+    <span style=color:#66d9ef>for</span> i <span style=color:#f92672>in</span> range(<span style=color:#ae81ff>128</span>):
+        b <span style=color:#f92672>=</span> i <span style=color:#f92672>^</span> x
+        a <span style=color:#f92672>=</span> i <span style=color:#f92672>&amp;</span> x
+        a<span style=color:#f92672>*=</span><span style=color:#ae81ff>2</span>
+        res <span style=color:#f92672>=</span> a <span style=color:#f92672>+</span> b
+        <span style=color:#66d9ef>if</span> res <span style=color:#f92672>==</span> <span style=color:#ae81ff>256</span>:
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#39;FOUND: {i} {chr(i)}&#39;</span>)
+</code></pre></div><p>Finally, working this all out, we get the flag,</p><p>Flag: <code>ctf{v1rtu4l_m4chine_pr0tection_is_soo_2010_xD}</code></p><p>Output: <a href=https://gist.github.com/AmunRha/8ec3d4184115bdec65c5f883c32d03c9#file-output-txt>output.txt</a>,</p><p>Full script,</p><script type=application/javascript src="https://gist.github.com/AmunRha/8ec3d4184115bdec65c5f883c32d03c9.js?file=solve_crackme_3kctf21.py"></script></div></div><div class=pagination><div class=pagination__title><span class=pagination__title-h>Read other posts</span><hr></div><div class=pagination__buttons><span class="button next"><a href=/posts/confirmation-of-identity-htb-finals-2021-57ac016bef444b6c8e0aab996b04fc6b/><span class=button__text>Confirmation of Identity— HTB Finals 2021</span>
+<span class=button__icon>→</span></a></span></div></div></div></div><footer class=footer><div class=footer__inner><div class="copyright copyright--user"><span>© 2020 AmunRha</span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span></div></div></footer><script src=/assets/main.js></script><script src=/assets/prism.js></script></div></body></html>
