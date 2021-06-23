@@ -127,9 +127,9 @@ res &lt;span style="color:#f92672">=&lt;/span> a &lt;span style="color:#f92672">
 &lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#39;FOUND: {i} {chr(i)}&amp;#39;&lt;/span>)
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>Finally, working this all out, we get the flag,&lt;/p>
 &lt;p>Flag: &lt;code>ctf{v1rtu4l_m4chine_pr0tection_is_soo_2010_xD}&lt;/code>&lt;/p>
-&lt;p>Output: &lt;a href="https://gist.github.com/AmunRha/8ec3d4184115bdec65c5f883c32d03c9#file-output-txt">output.txt&lt;/a>,&lt;/p>
+&lt;p>Output: &lt;a href="https://gist.github.com/AmunRha/8ec3d4184115bdec65c5f883c32d03c9#file-output_crackme_3kctf21-txt">output.txt&lt;/a>,&lt;/p>
 &lt;p>Full script,&lt;/p>
-&lt;script type="application/javascript" src="https://gist.github.com/AmunRha/8ec3d4184115bdec65c5f883c32d03c9.js?file=solve_crackme_3kctf21.py">&lt;/script></content></item><item><title>About</title><link>/about/</link><pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate><guid>/about/</guid><description>inli Welcome to my blog. Here I try to post the write ups of interesting challenges that I come across in CTFs and any other things that I wish to share with the community. Well, I am a CTF Player and I currently do Reverse Engineering. I play for team bi0s and was a former member at team zh3r0. Below is the copy-paste of my github README.</description><content>
+&lt;script type="application/javascript" src="https://gist.github.com/AmunRha/8ec3d4184115bdec65c5f883c32d03c9.js?file=disasm_crackme_3kctf21.py">&lt;/script></content></item><item><title>About</title><link>/about/</link><pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate><guid>/about/</guid><description>inli Welcome to my blog. Here I try to post the write ups of interesting challenges that I come across in CTFs and any other things that I wish to share with the community. Well, I am a CTF Player and I currently do Reverse Engineering. I play for team bi0s and was a former member at team zh3r0. Below is the copy-paste of my github README.</description><content>
 &lt;html>
 &lt;head>
 &lt;style>
