@@ -1,4 +1,66 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>CTF Blog</title><link>/</link><description>Recent content on CTF Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2020 AmunRha</copyright><lastBuildDate>Sun, 21 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Crackme — 3kctf 2021</title><link>/posts/crackme-3kctf-2021/</link><pubDate>Mon, 17 May 2021 00:00:00 +0000</pubDate><guid>/posts/crackme-3kctf-2021/</guid><description>Author: KERRO, Aziz
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>CTF Blog</title><link>/</link><description>Recent content on CTF Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2020 AmunRha</copyright><lastBuildDate>Sun, 21 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Discount VMProtect — X-MAS CTF 2019</title><link>/posts/discount-vmprotect-x-mas-ctf-2019/</link><pubDate>Sat, 29 May 2021 00:00:00 +0000</pubDate><guid>/posts/discount-vmprotect-x-mas-ctf-2019/</guid><description>Author: avlad171
+Tags: pintools, reversing, vm, xmasctf19, practice
+Writeup by: AmunRha
+This is a simple stack based VM challenge. We can solve this in two different ways.
+Using Intel Pintools to instrument the binary and reading the no of instructions executed. Recovering the structure used in the VM and writing a disassembler for it in python. The former method is easier and can be done within couple of minutes.</description><content>&lt;p>Author: avlad171&lt;/p>
+&lt;p>Tags: pintools, reversing, vm, xmasctf19, practice&lt;/p>
+&lt;p>Writeup by: AmunRha&lt;/p>
+&lt;p>This is a simple stack based VM challenge. We can solve this in two different ways.&lt;/p>
+&lt;ul>
+&lt;li>Using Intel Pintools to instrument the binary and reading the no of instructions executed.&lt;/li>
+&lt;li>Recovering the structure used in the VM and writing a disassembler for it in python.&lt;/li>
+&lt;/ul>
+&lt;p>The former method is easier and can be done within couple of minutes. The latter one will take longer than the former.&lt;/p>
+&lt;h1 id="method-1--instrumentation-of-the-binary">Method 1 — Instrumentation of the binary&lt;/h1>
+&lt;p>The following script will get the flag characters by instrumenting the binary and counting the instructions executed.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#f92672">import&lt;/span> os
+&lt;span style="color:#f92672">import&lt;/span> string
+START_CHAR &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;|&amp;#34;&lt;/span>
+POSSIBLE_CHARS &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;|&amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> string&lt;span style="color:#f92672">.&lt;/span>digits &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#34;}{_-&amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> string&lt;span style="color:#f92672">.&lt;/span>ascii_uppercase &lt;span style="color:#f92672">+&lt;/span> string&lt;span style="color:#f92672">.&lt;/span>ascii_lowercase
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">get_count&lt;/span>(cmd):
+pipe &lt;span style="color:#f92672">=&lt;/span> os&lt;span style="color:#f92672">.&lt;/span>popen(cmd)
+pipe&lt;span style="color:#f92672">.&lt;/span>readline()
+count &lt;span style="color:#f92672">=&lt;/span> pipe&lt;span style="color:#f92672">.&lt;/span>readline()&lt;span style="color:#f92672">.&lt;/span>split()[&lt;span style="color:#ae81ff">1&lt;/span>]
+&lt;span style="color:#66d9ef">return&lt;/span> int(count, &lt;span style="color:#ae81ff">0&lt;/span>)
+&lt;span style="color:#75715e"># Uncomment for Debug statements
+&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>():
+cmd &lt;span style="color:#f92672">=&lt;/span> f&lt;span style="color:#e6db74">&amp;#39;echo &amp;#34;{START_CHAR}&amp;#34; | ../../../pin -t obj-intel64/inscount0.so -- ~/VM&amp;#39;&lt;/span>
+count_prev &lt;span style="color:#f92672">=&lt;/span> get_count(cmd)
+flag &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&lt;/span>
+j &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;span style="color:#66d9ef">while&lt;/span> True:
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#e6db74">&amp;#34;X-MAS{&amp;#34;&lt;/span> &lt;span style="color:#f92672">in&lt;/span> flag &lt;span style="color:#f92672">and&lt;/span> &lt;span style="color:#e6db74">&amp;#34;}&amp;#34;&lt;/span> &lt;span style="color:#f92672">in&lt;/span> flag:
+&lt;span style="color:#66d9ef">break&lt;/span>
+i &lt;span style="color:#f92672">=&lt;/span> POSSIBLE_CHARS[j]
+j&lt;span style="color:#f92672">+=&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>
+cmd &lt;span style="color:#f92672">=&lt;/span> f&lt;span style="color:#e6db74">&amp;#39;echo &amp;#34;{flag}{i}&amp;#34; | ../../../pin -t obj-intel64/inscount0.so -- ~/VM&amp;#39;&lt;/span>
+&lt;span style="color:#66d9ef">if&lt;/span> i &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#34;|&amp;#34;&lt;/span>:
+count_prev &lt;span style="color:#f92672">=&lt;/span> get_count(cmd)
+&lt;span style="color:#75715e">#print(f&amp;#34;[*] Trying char: {flag}{i} | Instruction Count: {count_prev}&amp;#34;)
+&lt;/span>
+&lt;span style="color:#66d9ef">continue&lt;/span>
+count &lt;span style="color:#f92672">=&lt;/span> get_count(cmd)
+&lt;span style="color:#75715e">#print(f&amp;#34;[*] Trying char: {flag}{i} | Instruction Count: {count}&amp;#34;)
+&lt;/span>
+&lt;span style="color:#66d9ef">if&lt;/span> count &lt;span style="color:#f92672">==&lt;/span> count_prev:
+&lt;span style="color:#66d9ef">continue&lt;/span>
+&lt;span style="color:#66d9ef">elif&lt;/span> count &lt;span style="color:#f92672">!=&lt;/span> count_prev &lt;span style="color:#f92672">and&lt;/span> &lt;span style="color:#ae81ff">50&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span> abs(count&lt;span style="color:#f92672">-&lt;/span>count_prev):
+&lt;span style="color:#75715e"># 50 has been added for error correction while counting
+&lt;/span>
+flag &lt;span style="color:#f92672">+=&lt;/span> i
+&lt;span style="color:#75715e">#print(f&amp;#34;[!] Flag character found!&amp;#34;)
+&lt;/span>
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#34;[!] Flag: {flag}&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+j &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;span style="color:#66d9ef">print&lt;/span>(f&lt;span style="color:#e6db74">&amp;#34;[+] Final Flag: {flag}&amp;#34;&lt;/span>)
+&lt;span style="color:#66d9ef">if&lt;/span> __name__ &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#e6db74">&amp;#39;__main__&amp;#39;&lt;/span>:
+main()
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;em>inscount0.cpp was modified to output the result to the terminal rather than the file&lt;/em>&lt;/p>
+&lt;p>We can see the output over here,&lt;/p>
+&lt;p>&lt;img src="/blogImages/Discount%20VMProtect%20%E2%80%94%20X-MAS%20CTF%202019%205e295764bd9e416c85d3fd2b401785f3/Untitled.png" alt="/blogImages/Discount%20VMProtect%20%E2%80%94%20X-MAS%20CTF%202019%205e295764bd9e416c85d3fd2b401785f3/Untitled.png">&lt;/p>
+&lt;p>I will try to add &lt;strong>Method 2&lt;/strong> hopefully when I get the time to do so.&lt;/p>
+&lt;p>&lt;em>Note:- This wasn&amp;rsquo;t solved during the CTF and was my personal take since I heard the challenge was good.&lt;/em>&lt;/p></content></item><item><title>Crackme — 3kctf 2021</title><link>/posts/crackme-3kctf-2021/</link><pubDate>Mon, 17 May 2021 00:00:00 +0000</pubDate><guid>/posts/crackme-3kctf-2021/</guid><description>Author: KERRO, Aziz
 Tags: 3kctf21, reversing
 Writeup by: AmunRha
 Description Challenge Overview The challenge is a VM crackme challenge with 4 registers and a location to store data and opcodes.

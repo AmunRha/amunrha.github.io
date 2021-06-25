@@ -1,0 +1,48 @@
+<!doctype html><html lang=en><head><title>Discount VMProtect — X-MAS CTF 2019 :: CTF Blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="This is a challenge which I solved by instrumenting the binary with the help of intel pintools. This is an alternative way to solve this challenge by using a black box approach."><meta name=keywords content="[CTF Reverse Engineering Player Wolf WriteUps]"><meta name=robots content="noodp"><link rel=canonical href=/posts/discount-vmprotect-x-mas-ctf-2019/><link rel=stylesheet href=/assets/style.css><link rel=stylesheet href=/assets/red.css><link rel=apple-touch-icon href=/img/apple-touch-icon-192x192.png><link rel="shortcut icon" href=/images/wolf.jpg><meta name=twitter:card content="summary"><meta name=twitter:creator content="AmunRha"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="og:title" content="Discount VMProtect — X-MAS CTF 2019"><meta property="og:description" content="This is a challenge which I solved by instrumenting the binary with the help of intel pintools. This is an alternative way to solve this challenge by using a black box approach."><meta property="og:url" content="/posts/discount-vmprotect-x-mas-ctf-2019/"><meta property="og:site_name" content="CTF Blog"><meta property="og:image" content="/images/wolf.jpg"><meta property="og:image:width" content="2048"><meta property="og:image:height" content="1024"><meta property="article:published_time" content="2021-05-29 00:00:00 +0000 UTC"></head><body class=red><div class="container center headings--one-size"><header class=header><div class=header__inner><div class=header__logo><a href=/><div class=logo>AmunRha's Blog</div></a></div><div class=menu-trigger>menu</div></div><nav class=menu><ul class="menu__inner menu__inner--desktop"><li><a href=/about>About</a></li></ul><ul class="menu__inner menu__inner--mobile"><li><a href=/about>About</a></li></ul></nav></header><div class=content><div class=post><h1 class=post-title><a href=/posts/discount-vmprotect-x-mas-ctf-2019/>Discount VMProtect — X-MAS CTF 2019</a></h1><div class=post-meta><span class=post-date>2021-05-29</span>
+<span class=post-author>:: AmunRha</span></div><div class=post-content><div><p>Author: avlad171</p><p>Tags: pintools, reversing, vm, xmasctf19, practice</p><p>Writeup by: AmunRha</p><p>This is a simple stack based VM challenge. We can solve this in two different ways.</p><ul><li>Using Intel Pintools to instrument the binary and reading the no of instructions executed.</li><li>Recovering the structure used in the VM and writing a disassembler for it in python.</li></ul><p>The former method is easier and can be done within couple of minutes. The latter one will take longer than the former.</p><h1 id=method-1--instrumentation-of-the-binary>Method 1 — Instrumentation of the binary<a href=#method-1--instrumentation-of-the-binary class=hanchor arialabel=Anchor>&#8983;</a></h1><p>The following script will get the flag characters by instrumenting the binary and counting the instructions executed.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#f92672>import</span> os
+<span style=color:#f92672>import</span> string
+
+START_CHAR <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;|&#34;</span>
+POSSIBLE_CHARS <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;|&#34;</span> <span style=color:#f92672>+</span> string<span style=color:#f92672>.</span>digits <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34;}{_-&#34;</span> <span style=color:#f92672>+</span> string<span style=color:#f92672>.</span>ascii_uppercase <span style=color:#f92672>+</span> string<span style=color:#f92672>.</span>ascii_lowercase
+
+<span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_count</span>(cmd):
+    pipe <span style=color:#f92672>=</span> os<span style=color:#f92672>.</span>popen(cmd)
+    pipe<span style=color:#f92672>.</span>readline()
+    count <span style=color:#f92672>=</span> pipe<span style=color:#f92672>.</span>readline()<span style=color:#f92672>.</span>split()[<span style=color:#ae81ff>1</span>]
+    <span style=color:#66d9ef>return</span> int(count, <span style=color:#ae81ff>0</span>)
+
+<span style=color:#75715e># Uncomment for Debug statements</span>
+
+<span style=color:#66d9ef>def</span> <span style=color:#a6e22e>main</span>():
+    cmd <span style=color:#f92672>=</span> f<span style=color:#e6db74>&#39;echo &#34;{START_CHAR}&#34; | ../../../pin -t obj-intel64/inscount0.so -- ~/VM&#39;</span>
+    count_prev <span style=color:#f92672>=</span> get_count(cmd)
+    flag <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;&#34;</span>
+    j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+
+    <span style=color:#66d9ef>while</span> True:
+        <span style=color:#66d9ef>if</span> <span style=color:#e6db74>&#34;X-MAS{&#34;</span> <span style=color:#f92672>in</span> flag <span style=color:#f92672>and</span> <span style=color:#e6db74>&#34;}&#34;</span> <span style=color:#f92672>in</span> flag:
+            <span style=color:#66d9ef>break</span> 
+        i <span style=color:#f92672>=</span> POSSIBLE_CHARS[j]
+        j<span style=color:#f92672>+=</span><span style=color:#ae81ff>1</span>
+        cmd <span style=color:#f92672>=</span> f<span style=color:#e6db74>&#39;echo &#34;{flag}{i}&#34; | ../../../pin -t obj-intel64/inscount0.so -- ~/VM&#39;</span>
+        <span style=color:#66d9ef>if</span> i <span style=color:#f92672>==</span> <span style=color:#e6db74>&#34;|&#34;</span>:
+            count_prev <span style=color:#f92672>=</span> get_count(cmd)
+            <span style=color:#75715e>#print(f&#34;[*] Trying char: {flag}{i} | Instruction Count: {count_prev}&#34;)</span>
+            <span style=color:#66d9ef>continue</span>
+        count <span style=color:#f92672>=</span> get_count(cmd)
+        <span style=color:#75715e>#print(f&#34;[*] Trying char: {flag}{i} | Instruction Count: {count}&#34;)</span>
+        <span style=color:#66d9ef>if</span> count <span style=color:#f92672>==</span> count_prev:
+            <span style=color:#66d9ef>continue</span>
+        <span style=color:#66d9ef>elif</span> count <span style=color:#f92672>!=</span> count_prev <span style=color:#f92672>and</span> <span style=color:#ae81ff>50</span> <span style=color:#f92672>&lt;</span> abs(count<span style=color:#f92672>-</span>count_prev):
+				<span style=color:#75715e># 50 has been added for error correction while counting </span>
+            flag <span style=color:#f92672>+=</span> i
+            <span style=color:#75715e>#print(f&#34;[!] Flag character found!&#34;)</span>
+            <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#34;[!] Flag: {flag}</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>)
+            j <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+    <span style=color:#66d9ef>print</span>(f<span style=color:#e6db74>&#34;[+] Final Flag: {flag}&#34;</span>)    
+
+<span style=color:#66d9ef>if</span> __name__ <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;__main__&#39;</span>:
+    main()
+</code></pre></div><p><em>inscount0.cpp was modified to output the result to the terminal rather than the file</em></p><p>We can see the output over here,</p><p><img src=/blogImages/Discount%20VMProtect%20%E2%80%94%20X-MAS%20CTF%202019%205e295764bd9e416c85d3fd2b401785f3/Untitled.png alt=/blogImages/Discount%20VMProtect%20%E2%80%94%20X-MAS%20CTF%202019%205e295764bd9e416c85d3fd2b401785f3/Untitled.png></p><p>I will try to add <strong>Method 2</strong> hopefully when I get the time to do so.</p><p><em>Note:- This wasn&rsquo;t solved during the CTF and was my personal take since I heard the challenge was good.</em></p></div></div><div class=pagination><div class=pagination__title><span class=pagination__title-h>Read other posts</span><hr></div><div class=pagination__buttons><span class="button next"><a href=/posts/crackme-3kctf-2021/><span class=button__text>Crackme — 3kctf 2021</span>
+<span class=button__icon>→</span></a></span></div></div></div></div><footer class=footer><div class=footer__inner><div class="copyright copyright--user"><span>© 2020 AmunRha</span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span></div></div></footer><script src=/assets/main.js></script><script src=/assets/prism.js></script></div></body></html>
