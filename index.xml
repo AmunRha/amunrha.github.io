@@ -59,7 +59,7 @@ main()
 &lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;em>inscount0.cpp was modified to output the result to the terminal rather than the file&lt;/em>&lt;/p>
 &lt;p>We can see the output over here,&lt;/p>
 &lt;p>&lt;img src="/blogImages/Discount%20VMProtect%20%E2%80%94%20X-MAS%20CTF%202019%205e295764bd9e416c85d3fd2b401785f3/Untitled.png" alt="/blogImages/Discount%20VMProtect%20%E2%80%94%20X-MAS%20CTF%202019%205e295764bd9e416c85d3fd2b401785f3/Untitled.png">&lt;/p>
-&lt;p>Full script: &lt;img src="https://gist.github.com/AmunRha/c734cf68c973aad103f88f7fcde02fef" alt="discount_vmprotect.py">&lt;/p>
+&lt;p>Full script: &lt;a href="https://gist.github.com/AmunRha/c734cf68c973aad103f88f7fcde02fef">discount_vmprotect.py&lt;/a>&lt;/p>
 &lt;p>I will try to add &lt;strong>Method 2&lt;/strong> hopefully when I get the time to do so.&lt;/p>
 &lt;p>&lt;em>Note:- This wasn&amp;rsquo;t solved during the CTF and was my personal take since I heard the challenge was good.&lt;/em>&lt;/p></content></item><item><title>Crackme — 3kctf 2021</title><link>/posts/crackme-3kctf-2021/</link><pubDate>Mon, 17 May 2021 00:00:00 +0000</pubDate><guid>/posts/crackme-3kctf-2021/</guid><description>Author: KERRO, Aziz
 Tags: 3kctf21, reversing
