@@ -1,4 +1,346 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>CTF Blog</title><link>/</link><description>Recent content on CTF Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2020 AmunRha</copyright><lastBuildDate>Sun, 21 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Discount VMProtect — X-MAS CTF 2019</title><link>/posts/discount-vmprotect-x-mas-ctf-2019/</link><pubDate>Sat, 29 May 2021 00:00:00 +0000</pubDate><guid>/posts/discount-vmprotect-x-mas-ctf-2019/</guid><description>Author: avlad171
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>CTF Blog</title><link>/</link><description>Recent content on CTF Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>© 2020 AmunRha</copyright><lastBuildDate>Sun, 21 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>hell86 VM Crackme — by ttlhacker</title><link>/posts/hell86-vm-crackme-by-ttlhacker/</link><pubDate>Sat, 26 Jun 2021 00:00:00 +0000</pubDate><guid>/posts/hell86-vm-crackme-by-ttlhacker/</guid><description>Author: ttlhacker
+Tags: crackme, reversing, vm
+Writeup by: AmunRha
+Description x86_64 linux binary (tested on debian 9 and ubuntu 18.04, should run on any distro). Takes one command line argument and outputs &amp;ldquo;OK!&amp;rdquo; if it&amp;rsquo;s correct, &amp;ldquo;Wrong&amp;rdquo; if it&amp;rsquo;s not. Partially written in C, actual verification routine is assembly. Don&amp;rsquo;t patch the binary, of course - find the correct input.
+Introduction This is a wonderful VM crackme that I have ever tried.</description><content>&lt;p>Author: ttlhacker&lt;/p>
+&lt;p>Tags: crackme, reversing, vm&lt;/p>
+&lt;p>Writeup by: AmunRha&lt;/p>
+&lt;h1 id="description">Description&lt;/h1>
+&lt;blockquote>
+&lt;p>x86_64 linux binary (tested on debian 9 and ubuntu 18.04, should run on any distro). Takes one command line argument and outputs &amp;ldquo;OK!&amp;rdquo; if it&amp;rsquo;s correct, &amp;ldquo;Wrong&amp;rdquo; if it&amp;rsquo;s not.
+Partially written in C, actual verification routine is assembly.
+Don&amp;rsquo;t patch the binary, of course - find the correct input.&lt;/p>
+&lt;/blockquote>
+&lt;h1 id="introduction">Introduction&lt;/h1>
+&lt;p>This is a wonderful VM crackme that I have ever tried. Since this is my 2nd VM challenge that I have tried, I used the maximum amount of time I can to understand it and try every possible ideas I had in mind, and also cleared out a bunch of doubts and confusions I had as well.&lt;/p>
+&lt;p>Special Thanks to &lt;a href="https://x3ero0.github.io/">@x3ero0&lt;/a> giving out some tips ;)&lt;/p>
+&lt;p>This is going to be my version of the hell86 solution in the way I understood it, please feel free to point out any error in my analysis.&lt;/p>
+&lt;h1 id="solution">Solution&lt;/h1>
+&lt;p>So let us start with the special case of this VM.&lt;/p>
+&lt;p>This VM works by defining a signal handler for the opcode &lt;code>ud2&lt;/code> which will generate a Illegal Signal, or SIGILL.&lt;/p>
+&lt;p>The VM also defines a separate alternative stack allocated at the heap.&lt;/p>
+&lt;p>There are many great write ups out there who can explain how the signal handling works, so I am not going to go in depth about it.&lt;/p>
+&lt;p>The &lt;code>main()&lt;/code> function calls in 3 other functions,&lt;/p>
+&lt;ul>
+&lt;li>Initializing the Signal Stack&lt;/li>
+&lt;li>Initializing the Signal Handler&lt;/li>
+&lt;li>Calling first &lt;code>ud2&lt;/code> instruction to start of the signal handling routine.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled.png" alt="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled.png">&lt;/p>
+&lt;h2 id="signal-stack-initialization">Signal Stack initialization&lt;/h2>
+&lt;p>&lt;img src="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%201.png" alt="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%201.png">&lt;/p>
+&lt;p>We can see that the &lt;code>malloc&lt;/code> is called with the size as &lt;code>0x2000&lt;/code> and the ptr is then passed as the stack pointer for the alternative signal stack.&lt;/p>
+&lt;h2 id="setting-the-signal-handler">Setting the signal handler&lt;/h2>
+&lt;p>&lt;img src="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%202.png" alt="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%202.png">&lt;/p>
+&lt;p>You can see here that the signal handler function is being set in the signal struct and the func &lt;code>sigaction&lt;/code> is being passed with the struct.&lt;/p>
+&lt;h2 id="generating-the-first-sigill">Generating the first SIGILL&lt;/h2>
+&lt;p>&lt;img src="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%203.png" alt="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%203.png">&lt;/p>
+&lt;p>As you can see here, the first &lt;code>ud2&lt;/code> instruction is executed. But what is &lt;code>ud2&lt;/code> ?&lt;/p>
+&lt;h3 id="what-is-ud2-instruction">What is &lt;code>ud2&lt;/code> instruction?&lt;/h3>
+&lt;p>&lt;code>ud2&lt;/code> instruction is opcode value which will generate a &amp;ldquo;invalid opcode exception&amp;rdquo;. This is mostly used in software testing to intentionally generate a invalid opcode exception. Intel guarantees that this opcode will always be a undefined instruction.&lt;/p>
+&lt;p>So what has this got to do with our VM?&lt;/p>
+&lt;p>This special instruction will generate the &lt;code>SIGILL&lt;/code> signal, which the VM is dependent on to execute all its other opcode.&lt;/p>
+&lt;p>To simply say, whenever &lt;code>ud2&lt;/code> is called, &lt;code>SIGILL&lt;/code> is generated, which is handled by the custom VM function which then starts with parsing the next 14 bytes from the &lt;code>ud2&lt;/code> instruction into a structure which will be used to execute our VM opcodes and its respective operations.&lt;/p>
+&lt;h2 id="vm-handler">VM handler&lt;/h2>
+&lt;p>&lt;img src="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%204.png" alt="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%204.png">&lt;/p>
+&lt;p>As you can see this is the start of the VM handler where the structures are initialized.&lt;/p>
+&lt;p>After analyzing the switch cases, I managed to recover 2 main structures,&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>The VM struct&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#66d9ef">struct&lt;/span> vm_struct{
+uint64_t reg0;
+uint8_t opcode;
+uint8_t reg1;
+uint8_t reg2;
+uint8_t reg3;
+};
+&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>The bytecode struct&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#66d9ef">struct&lt;/span> bcode_struct
+{
+uint64_t mem[&lt;span style="color:#ae81ff">15&lt;/span>];
+uint64_t sp;
+uint64_t pc;
+};
+&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;p>The first one was the structure responsible for storing the bytes appropriately parsed from every 14 bytes after every &lt;code>ud2&lt;/code> instruction.&lt;/p>
+&lt;p>The second one is the bytecode structure is more like a memory region in which the values are stored, and further used for the operations defined. It also points to the next block of VM bytes to execute and the alternative stack address that we were speaking about in the beginning.&lt;/p>
+&lt;p>&lt;em>p.s. If you have read other write ups or solved the challenge before, you might already see that I didn&amp;rsquo;t see something very obvious in the structure pattern, which I shall explain at the end of this write up&lt;/em>&lt;/p>
+&lt;p>So, we can see that program counter is updated at the start to point to the next 14 bytes after every &lt;code>ud2&lt;/code> instruction.&lt;/p>
+&lt;h2 id="disassembling-the-vm-opcodes">Disassembling the VM opcodes&lt;/h2>
+&lt;p>There are total of 50 well defined opcodes in this VM, but we don&amp;rsquo;t need to concern with all of them. I ran a small check on which all opcodes are actually used in the given bytecode segment, and only implemented those.&lt;/p>
+&lt;p>There was in total of 23 opcodes which were used out of the 50 ones which are defined, so that became an easier task than analyzing all of the opcodes.&lt;/p>
+&lt;p>&lt;em>Spoiler alert! or not, most of the opcodes are implemented in the same way as in the x86 assembly. Well, the challenge name ain&amp;rsquo;t lying.&lt;/em>&lt;/p>
+&lt;p>There were opcodes to handle most of the arithmetic operations, opcodes to push and pop the stack, opcodes to call functions &lt;em>(yup, there are separate block of vm bytecode for different functions)&lt;/em>, and return statements from those functions.&lt;/p>
+&lt;p>I chose C to write its disassembler.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#75715e">// snipping out the previous code here
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">switch&lt;/span> (vm.opcode)
+{
+&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0x1&lt;/span> &lt;span style="color:#f92672">:&lt;/span>
+bcode.mem[vm.reg1] &lt;span style="color:#f92672">=&lt;/span> bcode.mem[vm.reg2] &lt;span style="color:#f92672">+&lt;/span> bcode.mem[vm.reg3];
+printf(disasm_ins[&lt;span style="color:#ae81ff">0&lt;/span>], vm.reg1, vm.reg2, vm.reg3);
+&lt;span style="color:#66d9ef">break&lt;/span>;
+&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0x2&lt;/span> &lt;span style="color:#f92672">:&lt;/span>
+bcode.mem[vm.reg1] &lt;span style="color:#f92672">=&lt;/span> bcode.mem[vm.reg2] &lt;span style="color:#f92672">-&lt;/span> bcode.mem[vm.reg3];
+printf(disasm_ins[&lt;span style="color:#ae81ff">1&lt;/span>], vm.reg1, vm.reg2, vm.reg3);
+&lt;span style="color:#66d9ef">break&lt;/span>;
+&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0x3&lt;/span> &lt;span style="color:#f92672">:&lt;/span>
+bcode.mem[vm.reg1] &lt;span style="color:#f92672">=&lt;/span> bcode.mem[vm.reg2] &lt;span style="color:#f92672">*&lt;/span> bcode.mem[vm.reg3];
+printf(disasm_ins[&lt;span style="color:#ae81ff">2&lt;/span>], vm.reg1, vm.reg2, vm.reg3);
+&lt;span style="color:#66d9ef">break&lt;/span>;
+&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0x8&lt;/span> &lt;span style="color:#f92672">:&lt;/span>
+bcode.mem[vm.reg1] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">-&lt;/span>bcode.mem[vm.reg2];
+printf(disasm_ins[&lt;span style="color:#ae81ff">3&lt;/span>], vm.reg1, vm.reg2);
+&lt;span style="color:#75715e">// snipping out the rest of the code here.
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="writing-a-debugger-kinda">Writing a debugger (kinda)&lt;/h2>
+&lt;p>Well, writing disassembler wasn&amp;rsquo;t enough for me, I wanted as much information from the VM that I can and also I only wanted to see instructions which were executed (like a trace). I went ahead and emulated all the VM instructions in my script finally managing to write a debugger with it to get all the information that I wanted.&lt;/p>
+&lt;p>At some places, we can see there are addresses pointing to places in the opcode array. Such addresses are relocatable addresses in the binary, and hence will change their position each time. Rather than taking a dump of the running binary, I just took the last 3 nibbles which didn&amp;rsquo;t seem to change and used that to dereference the array elements.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">bcode.vm_bbl &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span>)(vm.reg0 &lt;span style="color:#f92672">&amp;amp;&lt;/span> &lt;span style="color:#ae81ff">0xfff&lt;/span>) &lt;span style="color:#f92672">-&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span>)BBL_BASE_OFF;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>That&amp;rsquo;s when I realized that there were a few address which wasn&amp;rsquo;t in the range of offsets of the bytecode and I was confused. They were being dereferenced, although I had a logic implemented to tackle that, this was weird. So, I tried to debug those instructions, it seemed there was &lt;code>malloc&lt;/code> and &lt;code>free&lt;/code> called inside VM (&lt;em>ftw&lt;/em>). Well, since that&amp;rsquo;s the case, I implemented a workaround for that, by initializing an array named heap and just pointed the return address to that.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#f92672">----------&lt;/span> META DATA &lt;span style="color:#f92672">-----------&lt;/span>
+[&lt;span style="color:#f92672">+&lt;/span>] Addr of inp: &lt;span style="color:#ae81ff">0x55d80604b820&lt;/span>
+[&lt;span style="color:#f92672">+&lt;/span>] Addr of ptr to inp: &lt;span style="color:#ae81ff">0x55d80604bd68&lt;/span>
+[&lt;span style="color:#f92672">+&lt;/span>] Addr of stack: &lt;span style="color:#ae81ff">0x55d80604bf60&lt;/span>
+[&lt;span style="color:#f92672">+&lt;/span>] Addr of heap: &lt;span style="color:#ae81ff">0x55d80604be60&lt;/span>
+[&lt;span style="color:#f92672">+&lt;/span>] Addr of offset check: &lt;span style="color:#ae81ff">0x55d80604b8a0&lt;/span>
+[&lt;span style="color:#f92672">+&lt;/span>] Addr of ascii chars: &lt;span style="color:#ae81ff">0x55d80604b860&lt;/span>
+&lt;span style="color:#f92672">---------------------------------&lt;/span>
+[&lt;span style="color:#ae81ff">0x0&lt;/span>] [&lt;span style="color:#ae81ff">0&lt;/span>] OPCODE &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x9&lt;/span> &lt;span style="color:#f92672">---------&lt;/span>
+&lt;span style="color:#f92672">---------&lt;/span> REG VALS &lt;span style="color:#f92672">---------&lt;/span>
+[&lt;span style="color:#f92672">*&lt;/span>] reg0 &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x2&lt;/span>
+[&lt;span style="color:#f92672">*&lt;/span>] reg1 &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0xd&lt;/span>
+[&lt;span style="color:#f92672">*&lt;/span>] reg2 &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#f92672">*&lt;/span>] reg3 &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+&lt;span style="color:#f92672">---------&lt;/span> BCODE STRUCT &lt;span style="color:#f92672">---------&lt;/span>
+mem {
+[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x1&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x2&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x3&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x4&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x5&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x6&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x7&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x8&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x2&lt;/span>
+[&lt;span style="color:#ae81ff">0x9&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x55d80604bd60&lt;/span>
+[&lt;span style="color:#ae81ff">0xa&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x55d80604bd60&lt;/span>
+[&lt;span style="color:#ae81ff">0xb&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0xc&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0xd&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0xe&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+}
+res &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x55d80604bfc8&lt;/span> (stack[&lt;span style="color:#ae81ff">0xd&lt;/span>])
+vm_bbl &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+&lt;span style="color:#f92672">---------&lt;/span> STACK &lt;span style="color:#f92672">---------&lt;/span>
+stack { &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x1010101&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, }
+&lt;span style="color:#f92672">---------&lt;/span> HEAP &lt;span style="color:#f92672">---------&lt;/span>
+heap { &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>, }
+&lt;span style="color:#f92672">--------------------------------------&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0xd&lt;/span>], &lt;span style="color:#ae81ff">0x2&lt;/span>
+[&lt;span style="color:#ae81ff">0xe&lt;/span>] [&lt;span style="color:#ae81ff">1&lt;/span>] OPCODE &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x24&lt;/span> &lt;span style="color:#f92672">---------&lt;/span>
+&lt;span style="color:#f92672">---------&lt;/span> REG VALS &lt;span style="color:#f92672">---------&lt;/span>
+[&lt;span style="color:#f92672">*&lt;/span>] reg0 &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x2&lt;/span>
+[&lt;span style="color:#f92672">*&lt;/span>] reg1 &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#f92672">*&lt;/span>] reg2 &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x8&lt;/span>
+[&lt;span style="color:#f92672">*&lt;/span>] reg3 &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+&lt;span style="color:#f92672">---------&lt;/span> BCODE STRUCT &lt;span style="color:#f92672">---------&lt;/span>
+mem {
+[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x1&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x2&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x3&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x4&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x5&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x6&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x7&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0x8&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x2&lt;/span>
+[&lt;span style="color:#ae81ff">0x9&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x55d80604bd60&lt;/span>
+[&lt;span style="color:#ae81ff">0xa&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x55d80604bd60&lt;/span>
+[&lt;span style="color:#ae81ff">0xb&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0xc&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+[&lt;span style="color:#ae81ff">0xd&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x2&lt;/span>
+[&lt;span style="color:#ae81ff">0xe&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> &lt;span style="color:#ae81ff">0x0&lt;/span>
+}
+&lt;span style="color:#75715e">// snipping out rest of the output here
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;em>Part of the disassembly printed with debugger info&lt;/em>&lt;/p>
+&lt;h2 id="reading-the-disassembled-code">Reading the disassembled code&lt;/h2>
+&lt;p>After executing my VM script with sample outputs, I concluded the following.&lt;/p>
+&lt;ol>
+&lt;li>Flag length must be 0x24&lt;/li>
+&lt;li>Checks if input contains &amp;ldquo;FLAG{&amp;rdquo; at the start and &amp;ldquo;}&amp;rdquo; at the end&lt;/li>
+&lt;li>Checks if the flag is all lowercase+numbers+special_chars and no uppercases,
+&lt;ol>
+&lt;li>Allowed characters — &lt;code>abdfgehikmanoqrstucvwlxyz-01h23p456u78j9-_.+&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Gets the index from the allowed array from matching with your input, thereby forming an array of index from the allowed set. This is stored into the heap returned by the malloc (in our case the heap array)&lt;/li>
+&lt;li>Encryption algorithm gets executed and stores the encrypted value back to the heap&lt;/li>
+&lt;li>Final resulting bytes are checked with a stored array of encrypted bytes.&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#75715e">// snipping out previous disassembly here
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>mov mem[&lt;span style="color:#ae81ff">0x2&lt;/span>], &lt;span style="color:#ae81ff">0x5623e4e60860&lt;/span>
+sub mem[&lt;span style="color:#ae81ff">0xd&lt;/span>], mem[&lt;span style="color:#ae81ff">0xd&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> mem[&lt;span style="color:#ae81ff">0x2&lt;/span>]
+mov _QWORD[mem[&lt;span style="color:#ae81ff">0x1&lt;/span>]&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">0x0&lt;/span>], mem[&lt;span style="color:#ae81ff">0xd&lt;/span>]
+mov mem[&lt;span style="color:#ae81ff">0x1&lt;/span>], mem[&lt;span style="color:#ae81ff">0x1&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x8&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x8&lt;/span>], mem[&lt;span style="color:#ae81ff">0x8&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x1&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x9&lt;/span>], mem[&lt;span style="color:#ae81ff">0x9&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0xffffffffffffffff&lt;/span>
+cmp mem[&lt;span style="color:#ae81ff">0x9&lt;/span>], &lt;span style="color:#ae81ff">0&lt;/span>
+jnz &lt;span style="color:#ae81ff">0x5591cf15a4a0&lt;/span>
+push mem[&lt;span style="color:#ae81ff">0x1&lt;/span>]
+push mem[&lt;span style="color:#ae81ff">0x0&lt;/span>]
+push mem[&lt;span style="color:#ae81ff">0x8&lt;/span>]
+push mem[&lt;span style="color:#ae81ff">0x9&lt;/span>]
+mov mem[&lt;span style="color:#ae81ff">0x9&lt;/span>], _BYTE[mem[&lt;span style="color:#ae81ff">0x8&lt;/span>]&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">0x0&lt;/span>]
+mov mem[&lt;span style="color:#ae81ff">0x8&lt;/span>], &lt;span style="color:#ae81ff">0x5623e4e60860&lt;/span>
+call &lt;span style="color:#ae81ff">0x5591cf15a8c8&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0xd&lt;/span>], mem[&lt;span style="color:#ae81ff">0x8&lt;/span>]
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], _BYTE[mem[&lt;span style="color:#ae81ff">0xd&lt;/span>]&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">0x0&lt;/span>]
+cmp mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], &lt;span style="color:#ae81ff">0&lt;/span>
+jz &lt;span style="color:#ae81ff">0x5591cf15a92a&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">==&lt;/span> mem[&lt;span style="color:#ae81ff">0x9&lt;/span>]
+ret &lt;span style="color:#66d9ef">if&lt;/span> mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0xd&lt;/span>], mem[&lt;span style="color:#ae81ff">0xd&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x1&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x10&lt;/span>], &lt;span style="color:#ae81ff">0x5591cf15a8d6&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], _BYTE[mem[&lt;span style="color:#ae81ff">0xd&lt;/span>]&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">0x0&lt;/span>]
+cmp mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], &lt;span style="color:#ae81ff">0&lt;/span>
+jz &lt;span style="color:#ae81ff">0x5591cf15a92a&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">==&lt;/span> mem[&lt;span style="color:#ae81ff">0x9&lt;/span>]
+ret &lt;span style="color:#66d9ef">if&lt;/span> mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0xd&lt;/span>], mem[&lt;span style="color:#ae81ff">0xd&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x1&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x10&lt;/span>], &lt;span style="color:#ae81ff">0x5591cf15a8d6&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], _BYTE[mem[&lt;span style="color:#ae81ff">0xd&lt;/span>]&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">0x0&lt;/span>]
+cmp mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], &lt;span style="color:#ae81ff">0&lt;/span>
+jz &lt;span style="color:#ae81ff">0x5591cf15a92a&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">==&lt;/span> mem[&lt;span style="color:#ae81ff">0x9&lt;/span>]
+ret &lt;span style="color:#66d9ef">if&lt;/span> mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0xd&lt;/span>], mem[&lt;span style="color:#ae81ff">0xd&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x1&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x10&lt;/span>], &lt;span style="color:#ae81ff">0x5591cf15a8d6&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], _BYTE[mem[&lt;span style="color:#ae81ff">0xd&lt;/span>]&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">0x0&lt;/span>]
+cmp mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], &lt;span style="color:#ae81ff">0&lt;/span>
+jz &lt;span style="color:#ae81ff">0x5591cf15a92a&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">==&lt;/span> mem[&lt;span style="color:#ae81ff">0x9&lt;/span>]
+ret &lt;span style="color:#66d9ef">if&lt;/span> mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0xd&lt;/span>], mem[&lt;span style="color:#ae81ff">0xd&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#ae81ff">0x1&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x10&lt;/span>], &lt;span style="color:#ae81ff">0x5591cf15a8d6&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], _BYTE[mem[&lt;span style="color:#ae81ff">0xd&lt;/span>]&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">0x0&lt;/span>]
+cmp mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], &lt;span style="color:#ae81ff">0&lt;/span>
+jz &lt;span style="color:#ae81ff">0x5591cf15a92a&lt;/span>
+mov mem[&lt;span style="color:#ae81ff">0x0&lt;/span>], mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">==&lt;/span> mem[&lt;span style="color:#ae81ff">0x9&lt;/span>]
+ret &lt;span style="color:#66d9ef">if&lt;/span> mem[&lt;span style="color:#ae81ff">0x0&lt;/span>] &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>
+&lt;span style="color:#75715e">// snipping out rest of the disassembly here
+&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;em>Part of the cleaner disassembly printed without debugger info&lt;/em>&lt;/p>
+&lt;h2 id="writing-the-decryption-algorithm">Writing the decryption algorithm&lt;/h2>
+&lt;p>Since the algorithm is fairly simple, I went for brute forcing the flag bytes. The range was set to the allowed characters, and the encryption routine was called in checking if it matches the final result.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#75715e">#include&lt;/span>&lt;span style="color:#75715e">&amp;lt;stdio.h&amp;gt;&lt;/span>&lt;span style="color:#75715e">
+&lt;/span>&lt;span style="color:#75715e">#include&lt;/span>&lt;span style="color:#75715e">&amp;lt;stdint.h&amp;gt;&lt;/span>&lt;span style="color:#75715e">
+&lt;/span>&lt;span style="color:#75715e">&lt;/span>
+int64_t enc[] &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#ae81ff">0x16C8&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFF8BA1&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFE0C0&lt;/span>, &lt;span style="color:#ae81ff">0x3600&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFE535&lt;/span>, &lt;span style="color:#ae81ff">0x16C8&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFF8BA1&lt;/span>, &lt;span style="color:#ae81ff">0x5F45&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFD668&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFFFF8&lt;/span>, &lt;span style="color:#ae81ff">0x5F45&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFCA00&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFBB58&lt;/span>, &lt;span style="color:#ae81ff">0x0AB8&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFBB58&lt;/span>, &lt;span style="color:#ae81ff">0x4CE3&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFF8000&lt;/span>, &lt;span style="color:#ae81ff">0x2D9&lt;/span>, &lt;span style="color:#ae81ff">0x4CE3&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFFFFF&lt;/span>, &lt;span style="color:#ae81ff">0x2D9&lt;/span>, &lt;span style="color:#ae81ff">0x3E8&lt;/span>, &lt;span style="color:#ae81ff">0x7D&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFE938&lt;/span>, &lt;span style="color:#ae81ff">0x200&lt;/span>, &lt;span style="color:#ae81ff">0x200&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFE535&lt;/span>, &lt;span style="color:#ae81ff">0x1F40&lt;/span>, &lt;span style="color:#ae81ff">0x0FFFFFFFFFFFFE0C0&lt;/span>, &lt;span style="color:#ae81ff">0x0&lt;/span>};
+int64_t loff[&lt;span style="color:#ae81ff">30&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#ae81ff">0&lt;/span>};
+int64_t lenc[&lt;span style="color:#ae81ff">30&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#ae81ff">0&lt;/span>};
+&lt;span style="color:#66d9ef">char&lt;/span> inp[] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;x86defghijklmnopqrstuvwxyz01234&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">char&lt;/span> ascii[] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;abdfgehikmanoqrstucvwlxyz-01h23p456u78j9-_.+&amp;#34;&lt;/span>;
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">encrypt&lt;/span>(){
+&lt;span style="color:#66d9ef">int&lt;/span> k &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x1e&lt;/span>;
+&lt;span style="color:#66d9ef">for&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> i&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">0&lt;/span>;i&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">30&lt;/span>;i&lt;span style="color:#f92672">++&lt;/span>){
+&lt;span style="color:#66d9ef">int&lt;/span> a &lt;span style="color:#f92672">=&lt;/span> (loff[i&lt;span style="color:#f92672">+&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#f92672">-&lt;/span> loff[i]) &lt;span style="color:#f92672">^&lt;/span> &lt;span style="color:#f92672">--&lt;/span>k;
+a &lt;span style="color:#f92672">=&lt;/span> a &lt;span style="color:#f92672">*&lt;/span> a &lt;span style="color:#f92672">*&lt;/span> a;
+lenc[i] &lt;span style="color:#f92672">=&lt;/span> a;
+}
+}
+&lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">find_off&lt;/span>(&lt;span style="color:#66d9ef">char&lt;/span> &lt;span style="color:#f92672">*&lt;/span>inp){
+loff[&lt;span style="color:#ae81ff">29&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0x1e&lt;/span>;
+&lt;span style="color:#66d9ef">for&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> i&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">0&lt;/span>;i&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">30&lt;/span>;i&lt;span style="color:#f92672">++&lt;/span>)
+&lt;span style="color:#66d9ef">for&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> j&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">0&lt;/span>;j&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">44&lt;/span>;j&lt;span style="color:#f92672">++&lt;/span>)
+&lt;span style="color:#66d9ef">if&lt;/span>(inp[i] &lt;span style="color:#f92672">==&lt;/span> ascii[j]){
+loff[i] &lt;span style="color:#f92672">=&lt;/span> j; &lt;span style="color:#75715e">// stores the idx found
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">break&lt;/span>;
+}
+}
+&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(){
+&lt;span style="color:#66d9ef">int&lt;/span> k &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>;
+printf(&lt;span style="color:#e6db74">&amp;#34;FLAG{x&amp;#34;&lt;/span>);
+&lt;span style="color:#66d9ef">for&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> i&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">0&lt;/span>;i&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">44&lt;/span>;i&lt;span style="color:#f92672">++&lt;/span>){
+&lt;span style="color:#66d9ef">if&lt;/span>(k &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">30&lt;/span>)
+&lt;span style="color:#66d9ef">break&lt;/span>;
+inp[k] &lt;span style="color:#f92672">=&lt;/span> ascii[i]; &lt;span style="color:#75715e">// tries all possible characters in the set
+&lt;/span>&lt;span style="color:#75715e">&lt;/span> find_off(inp);
+encrypt(loff);
+&lt;span style="color:#66d9ef">if&lt;/span>(lenc[k&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>] &lt;span style="color:#f92672">==&lt;/span> enc[k&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>]){
+k&lt;span style="color:#f92672">+=&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>;
+printf(&lt;span style="color:#e6db74">&amp;#34;%c&amp;#34;&lt;/span>, ascii[i]);
+i&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#ae81ff">0&lt;/span>;
+}
+}
+printf(&lt;span style="color:#e6db74">&amp;#34;}&lt;/span>&lt;span style="color:#ae81ff">\n&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>);
+&lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+}
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Running this gives out our flag!&lt;/p>
+&lt;p>&lt;img src="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%205.png" alt="/blogImages/hell86%20Crackme%20%E2%80%94%20by%20ttlhacker%20ec8074d6748a4ed39ebe60a9cedd40c6/Untitled%205.png">&lt;/p>
+&lt;p>Flag: &lt;code>FLAG{x86-1s-s0-fund4m3nt4lly-br0k3n}&lt;/code>&lt;/p>
+&lt;h2 id="conclusion">Conclusion&lt;/h2>
+&lt;p>As I said, I eventually realized while discussing about this and reading the write ups that I missed something.&lt;/p>
+&lt;p>The VM structure of this binary is the similar to the x64 registers struct, and it is the one which is used throughout the whole execution. It uses the actual x64 registers, and not a new one. This also explains why the structure changed its values after the &lt;code>malloc&lt;/code> and &lt;code>free&lt;/code> call.&lt;/p>
+&lt;div class="highlight">&lt;pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">&lt;span style="color:#75715e">/*
+&lt;/span>&lt;span style="color:#75715e"> * The 64-bit signal frame:
+&lt;/span>&lt;span style="color:#75715e"> */&lt;/span>
+&lt;span style="color:#66d9ef">struct&lt;/span> sigcontext_64 {
+__u64 r8;
+__u64 r9;
+__u64 r10;
+__u64 r11;
+__u64 r12;
+__u64 r13;
+__u64 r14;
+__u64 r15;
+__u64 di;
+__u64 si;
+__u64 bp;
+__u64 bx;
+__u64 dx;
+__u64 ax;
+__u64 cx;
+__u64 sp;
+__u64 ip;
+__u64 flags;
+__u16 cs;
+__u16 gs;
+__u16 fs;
+__u16 ss;
+__u64 err;
+__u64 trapno;
+__u64 oldmask;
+__u64 cr2;
+&lt;span style="color:#75715e">/*
+&lt;/span>&lt;span style="color:#75715e"> * fpstate is really (struct _fpstate *) or (struct _xstate *)
+&lt;/span>&lt;span style="color:#75715e"> * depending on the FP_XSTATE_MAGIC1 encoded in the SW reserved
+&lt;/span>&lt;span style="color:#75715e"> * bytes of (struct _fpstate) and FP_XSTATE_MAGIC2 present at the end
+&lt;/span>&lt;span style="color:#75715e"> * of extended memory layout. See comments at the definition of
+&lt;/span>&lt;span style="color:#75715e"> * (struct _fpx_sw_bytes)
+&lt;/span>&lt;span style="color:#75715e"> */&lt;/span>
+__u64 fpstate; &lt;span style="color:#75715e">/* Zero when no FPU/extended context */&lt;/span>
+__u64 reserved1[&lt;span style="color:#ae81ff">8&lt;/span>];
+};
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>And therefore you can use gdb or any other elf debugger to debug this VM.&lt;/p>
+&lt;p>So, that&amp;rsquo;s it folks, that is my solution to the hell86 crackme.&lt;/p>
+&lt;p>Disassembler,
+&lt;script type="application/javascript" src="https://gist.github.com/AmunRha/2396f09357bb5ef102af9ad48fb58cb7.js?file=_hell86_disasm.c">&lt;/script>
+&lt;/p>
+&lt;p>Decrypter,
+&lt;script type="application/javascript" src="https://gist.github.com/AmunRha/2396f09357bb5ef102af9ad48fb58cb7.js?file=hell86_decrypt.c">&lt;/script>
+&lt;/p>
+&lt;p>Link:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://gist.github.com/AmunRha/2396f09357bb5ef102af9ad48fb58cb7#file-_hell86_disasm-c">hell86_disassembler.c&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://gist.github.com/AmunRha/2396f09357bb5ef102af9ad48fb58cb7#file-hell86_decrypt-c">hell86_decrypt.c&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="references">References&lt;/h2>
+&lt;p>&lt;a href="https://hjlebbink.github.io/x86doc/html/UD2.html">https://hjlebbink.github.io/x86doc/html/UD2.html&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://man7.org/linux/man-pages/man7/signal.7.html">https://man7.org/linux/man-pages/man7/signal.7.html&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/x64-architecture">https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/x64-architecture&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://github.com/torvalds/linux/blob/master/arch/x86/include/uapi/asm/sigcontext.h">https://github.com/torvalds/linux/blob/master/arch/x86/include/uapi/asm/sigcontext.h&lt;/a>&lt;/p></content></item><item><title>Discount VMProtect — X-MAS CTF 2019</title><link>/posts/discount-vmprotect-x-mas-ctf-2019/</link><pubDate>Sat, 29 May 2021 00:00:00 +0000</pubDate><guid>/posts/discount-vmprotect-x-mas-ctf-2019/</guid><description>Author: avlad171
 Tags: pintools, reversing, vm, xmasctf19, practice
 Writeup by: AmunRha
 This is a simple stack based VM challenge. We can solve this in two different ways.
