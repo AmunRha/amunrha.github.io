@@ -534,20 +534,10 @@ video {
   
   h2:before {
   --tw-text-opacity: 1;
-  color: rgb(136 19 55 / var(--tw-text-opacity));
-}
-  
-  h2:hover:before {
-  --tw-text-opacity: 1;
-  color: rgb(159 18 57 / var(--tw-text-opacity));
-}
-  
-  h2:is(.dark *):before {
-  --tw-text-opacity: 1;
   color: rgb(244 63 94 / var(--tw-text-opacity));
 }
   
-  h2:hover:is(.dark *):before {
+  h2:hover:before {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity));
 }
@@ -563,20 +553,10 @@ video {
 
   h3:before {
   --tw-text-opacity: 1;
-  color: rgb(136 19 55 / var(--tw-text-opacity));
-}
-
-  h3:hover:before {
-  --tw-text-opacity: 1;
-  color: rgb(159 18 57 / var(--tw-text-opacity));
-}
-
-  h3:is(.dark *):before {
-  --tw-text-opacity: 1;
   color: rgb(244 63 94 / var(--tw-text-opacity));
 }
 
-  h3:hover:is(.dark *):before {
+  h3:hover:before {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity));
 }
@@ -592,20 +572,10 @@ video {
   
   h4:before {
   --tw-text-opacity: 1;
-  color: rgb(136 19 55 / var(--tw-text-opacity));
-}
-  
-  h4:hover:before {
-  --tw-text-opacity: 1;
-  color: rgb(159 18 57 / var(--tw-text-opacity));
-}
-  
-  h4:is(.dark *):before {
-  --tw-text-opacity: 1;
   color: rgb(244 63 94 / var(--tw-text-opacity));
 }
   
-  h4:hover:is(.dark *):before {
+  h4:hover:before {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity));
 }
@@ -621,20 +591,10 @@ video {
 
   h5:before {
   --tw-text-opacity: 1;
-  color: rgb(136 19 55 / var(--tw-text-opacity));
-}
-
-  h5:hover:before {
-  --tw-text-opacity: 1;
-  color: rgb(159 18 57 / var(--tw-text-opacity));
-}
-
-  h5:is(.dark *):before {
-  --tw-text-opacity: 1;
   color: rgb(244 63 94 / var(--tw-text-opacity));
 }
 
-  h5:hover:is(.dark *):before {
+  h5:hover:before {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity));
 }
@@ -650,20 +610,10 @@ video {
   
   h6:before {
   --tw-text-opacity: 1;
-  color: rgb(136 19 55 / var(--tw-text-opacity));
-}
-  
-  h6:hover:before {
-  --tw-text-opacity: 1;
-  color: rgb(159 18 57 / var(--tw-text-opacity));
-}
-  
-  h6:is(.dark *):before {
-  --tw-text-opacity: 1;
   color: rgb(244 63 94 / var(--tw-text-opacity));
 }
   
-  h6:hover:is(.dark *):before {
+  h6:hover:before {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity));
 }
@@ -673,6 +623,7 @@ video {
   }
 
   hr {
+  border-width: 2px;
   --tw-border-opacity: 1;
   border-color: rgb(229 231 235 / var(--tw-border-opacity));
 }
@@ -1010,6 +961,9 @@ video {
 .block {
   display: block;
 }
+.inline {
+  display: inline;
+}
 .flex {
   display: flex;
 }
@@ -1111,6 +1065,10 @@ video {
   font-size: 1.125rem;
   line-height: 1.75rem;
 }
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
@@ -1142,31 +1100,37 @@ nav a.active:is(.dark *) {
 }
 /* Content overrides */
 #content {
+  padding: 2rem;
   line-height: 1.5;
 }
+@media (min-width: 768px) {
+
+  #content {
+    padding: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+
+  #content {
+    padding: 0px;
+  }
+}
 #content a {
-  font-weight: 700;
-  --tw-text-opacity: 1;
-  color: rgb(136 19 55 / var(--tw-text-opacity));
-  text-decoration-line: underline;
-}
+    transition: 0.3s;
+    font-weight: 700;
+    --tw-text-opacity: 1;
+    color: rgb(244 63 94 / var(--tw-text-opacity));
+    text-decoration-line: underline;
+  }
 #content a:hover {
-  --tw-text-opacity: 1;
-  color: rgb(159 18 57 / var(--tw-text-opacity));
-}
-#content a:is(.dark *) {
-  --tw-text-opacity: 1;
-  color: rgb(244 63 94 / var(--tw-text-opacity));
-}
-#content a:hover:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity));
 }
 #content .date {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
   font-weight: 600;
   --tw-text-opacity: 1;
   color: rgb(156 163 175 / var(--tw-text-opacity));
@@ -1219,6 +1183,12 @@ nav a.active:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(209 213 219 / var(--tw-text-opacity));
 }
+.read-more {
+    transition: 0.3s;
+  }
+.read-more:hover {
+    transform: scale(1.04);
+  }
 #content .read-more {
   display: inline-flex;
   align-items: center;
@@ -1227,18 +1197,10 @@ nav a.active:is(.dark *) {
   line-height: 1.25rem;
   font-weight: 600;
   --tw-text-opacity: 1;
-  color: rgb(136 19 55 / var(--tw-text-opacity));
+  color: rgb(244 63 94 / var(--tw-text-opacity));
   text-decoration-line: none;
 }
 #content .read-more:hover {
-  --tw-text-opacity: 1;
-  color: rgb(159 18 57 / var(--tw-text-opacity));
-}
-#content .read-more:is(.dark *) {
-  --tw-text-opacity: 1;
-  color: rgb(244 63 94 / var(--tw-text-opacity));
-}
-#content .read-more:hover:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity));
 }
@@ -1351,6 +1313,9 @@ nav a.active:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity));
 }
+.pagination-button {
+    transition: 0.3s;
+  }
 #content .pagination-button {
   display: inline-flex;
   align-items: center;
@@ -1436,6 +1401,21 @@ nav a.active:is(.dark *) {
 #content span.task-list + ul {
   list-style-type: none;
 }
+.theme-icon {
+    border-radius: 4px;
+    transition: 0.3s;
+  }
+.theme-icon:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 63 94 / var(--tw-bg-opacity));
+}
+.theme-icon svg:hover {
+    stroke: white;
+    fill: none;
+  }
+.theme-icon svg {
+    padding: 2px;
+  }
 /* Misc */
 #site-title {
   text-align: center;
@@ -1488,6 +1468,29 @@ nav a.active:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(209 213 219 / var(--tw-text-opacity));
 }
+
+@media screen and (max-width: 768px) {
+  .header {
+    justify-content: center;
+    gap: 8px;
+  }
+  footer {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.hover\:text-rose-400:hover {
+  --tw-text-opacity: 1;
+  color: rgb(251 113 133 / var(--tw-text-opacity));
+}
+
+.hover\:decoration-rose-400:hover {
+  text-decoration-color: #fb7185;
+}
+
 @media (min-width: 640px) {
 
   .sm\:order-1 {
