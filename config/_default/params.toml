@@ -2,7 +2,7 @@
 isSinglePage = true
 
 # Meta Config
-description = "AmunRha - Windows Security Researcher | Reverse Engineer"
+description = "CTF Player | Windows Security Researcher | Reverse Engineer"
 
 # Header Configuration
 avatar = "img/wolf_square.jpg"
