@@ -1,0 +1,49 @@
+User-agent: *
+
+Disallow: /
+
+Disallow: /posts/bluelock_bi0sctf23/
+
+Disallow: /categories/
+
+Disallow: /categories/ctf/
+
+Disallow: /tags/exe/
+
+Disallow: /tags/malware/
+
+Disallow: /categories/malware/
+
+Disallow: /posts/
+
+Disallow: /categories/reverse-engineering/
+
+Disallow: /tags/
+
+Disallow: /tags/crackme/
+
+Disallow: /posts/hell86vm_ttlhacker/
+
+Disallow: /tags/vm/
+
+Disallow: /posts/discountvmprotect_xmasctf19/
+
+Disallow: /tags/pintools/
+
+Disallow: /posts/crackme_3kctf21/
+
+Disallow: /posts/confirmationofidentity_htbfinals21/
+
+Disallow: /tags/patching/
+
+Disallow: /tags/.net/
+
+Disallow: /tags/crypto/
+
+Disallow: /posts/keygenme_bsidessfctf21/
+
+Disallow: /posts/2k_redpwnctf21/
+
+Disallow: /tags/ctf/
+
+Disallow: /tags/z3/

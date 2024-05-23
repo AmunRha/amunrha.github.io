@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en-US" class="scroll-smooth dark">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BlueLock | Windows Malware | bi0sCTF 2022</title>
+<meta
+  name="description"
+  content="Windows based malware challenge. Implemented exception handler mechanism two stages with an added pain of CPP code wrapped around classes."
+/>
+<link rel="canonical" href="http://localhost:1313/posts/bluelock_bi0sctf22/" />
+<link rel="robots" href="/robots.txt" />
+
+<link rel="icon" type="image/x-icon" href="/icons/japanese-gate.png" />
+
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });</script>
+
+<link rel="stylesheet" href="http://localhost:1313/css/app.css" /></head>
+
+  <body class="max-w-screen-md mx-auto">
+    <div class="header">
+      <header class="flex flex-col sm:flex-row items-center gap-5 sm:gap-10 pt-16 py-12">
+   
+
+
+<div class="flex-none w-20 h-20 rounded-full overflow-hidden">
+  <a href="http://localhost:1313/">
+    <img
+      srcset="/img/wolf_square_hu645558ecb8afb14e922dea00fd85691e_168845_80x80_fill_q90_box_smart1.jpg 80w"
+      src="/img/wolf_square.jpg"
+      width="978"
+      height="1080"
+      alt="AmunRha&#39;s Blog"
+    />
+  </a>
+</div>
+
+  
+  <div class="flex flex-col gap-5">
+    <a href="http://localhost:1313/">
+  <h1 id="site-title">AmunRha&#39;s Blog</h1>
+</a>
+ 
+    <nav>
+  <ul>
+     
+    
+    <li>
+      <a href="/" class="">
+        About me
+      </a>
+    </li>
+    
+    <li>
+      <a href="/posts" class="">
+        Posts
+      </a>
+    </li>
+    
+    <li>
+      <a href="/categories" class="">
+        Categories
+      </a>
+    </li>
+    
+    <li>
+      <a href="/tags" class="">
+        Tags
+      </a>
+    </li>
+    
+  </ul>
+</nav>
+
+  </div>
+</header>
+
+      <button class="toggle-theme" aria-label="Toggle Theme" title="Toggle Theme" onclick="toggleTheme()">
+  <span class="theme-icon light"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+</svg> </span>
+  <span class="theme-icon dark"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+</svg> </span>
+</button>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const theme = localStorage.getItem('theme');
+
+    if (!theme || theme === 'light') {
+      setTheme('light');
+    } else {
+      setTheme(theme);
+    }
+  });
+
+  function setTheme(theme) {
+    const html = document.querySelector('html');
+    localStorage.setItem('theme', theme);
+
+    if (theme === 'light') {
+      if (html.classList.contains('dark')) {
+        document.querySelector('html').classList.remove('dark');
+      }
+
+      document.querySelector('.theme-icon.light').style.display = 'none';
+      document.querySelector('.theme-icon.dark').style.display = 'block';
+    } else {
+      if (!html.classList.contains('dark')) {
+        document.querySelector('html').classList.add('dark');
+      }
+
+      document.querySelector('.theme-icon.dark').style.display = 'none';
+      document.querySelector('.theme-icon.light').style.display = 'block';
+    }
+  }
+
+  function toggleTheme() {
+    const theme = localStorage.getItem('theme');
+
+    if (theme === 'light') {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+  }
+</script>
+    </div>
+  
+    <main id="content">
+
+<article class="flex flex-col gap-10">
+  <header class="flex flex-col gap-2">
+    <h2 class="title-large">BlueLock | Windows Malware | bi0sCTF 2022</h2>
+
+    <div class="meta">
+      
+      <time datetime="2023-02-10 00:00:00 &#43;0000 UTC" title='Fri, Feb 10, 2023, 12:00 AM UTC'>
+        10/02/2023 - Estimated reading time: 15 minutes
+      </time>
+
+       
+       — 
+        
+          <a class="categories" href="/categories/ctf/" alt="CTF">
+            CTF
+          </a>
+        
+          <a class="categories" href="/categories/malware/" alt="Malware">
+            Malware
+          </a>
+        
+          <a class="categories" href="/categories/reverse-engineering/" alt="Reverse Engineering">
+            Reverse Engineering
+          </a>
+         
+      
+    </div>
+  </header>
+
+  
+  <aside class="table-of-contents">
+    <h2 class="title-small">Table of Contents</h2>
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#challenge-description">Challenge Description</a></li>
+    <li><a href="#triage">Triage</a></li>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#first-stage">First Stage</a>
+      <ul>
+        <li><a href="#first-seh-exception-handler">First SEH Exception handler</a></li>
+        <li><a href="#second-seh-exception-handler">Second SEH Exception handler</a></li>
+      </ul>
+    </li>
+    <li><a href="#second-stage">Second Stage</a>
+      <ul>
+        <li><a href="#first-veh-handler">First VEH Handler</a></li>
+        <li><a href="#second-veh-handler">Second VEH Handler</a></li>
+        <li><a href="#destruction-of-key">Destruction of Key</a></li>
+        <li><a href="#xxtea-yet-again">xxtea yet again</a></li>
+        <li><a href="#retrieving-the-flag">Retrieving the flag</a></li>
+      </ul>
+    </li>
+    <li><a href="#finale">Finale</a></li>
+    <li><a href="#alternative---first-stage">Alternative - First Stage</a>
+      <ul>
+        <li><a href="#malunpack--pe---sieve">MalUnpack / PE - Sieve</a></li>
+      </ul>
+    </li>
+    <li><a href="#closing-note">Closing Note</a></li>
+  </ul>
+</nav>
+  </aside>
+
+
+  <section><p><strong>tl;dr</strong></p>
+<ul>
+<li>Implemented two SEH and two VEH Exception Handlers</li>
+<li>Two stage malware challenge with process injection technique</li>
+<li>CPP binary where logic is wrapped in classes and their member functions</li>
+</ul>
+<p><strong>Challenge points</strong>: 1000</p>
+<p><strong>No. of solves</strong>: 1</p>
+<p>Original Write-Up link: <a href="https://blog.bi0s.in/2023/02/10/RE/Windows/bi0sCTF22-BlueLock/">BlueLock - Team bi0s&rsquo; Blog</a></p>
+<h1 id="challenge-description">Challenge Description</h1>
+<p>There was a breach within the system, our antivirus engines tagged the executable with 0 red flags. Although behavior analysis suggests the executable could be live malware. Unsure about what it does, we have handed it over to you. We also provide you with an additional file, we are unsure about its use case of it.</p>
+<p>Here is something we noticed which might help you, the executable is capable of destroying its previous state, and we noticed it overwrites the file it came with.</p>
+<p>Note: This is live malware, advised to run it within a VM to avoid side effects.</p>
+<p>Password: <strong>infected</strong></p>
+<p><strong>Challenge File</strong>:</p>
+<ul>
+<li><a href="https://drive.google.com/file/d/1tyQC5P7hYYjCTZcptn8-NCdierANnQ31/view?usp=share_link">Primary Link</a></li>
+<li><a href="">Mirror Link</a></li>
+</ul>
+<p><strong>MD5 Hash</strong>:</p>
+<ul>
+<li><em>malware.exe</em>: 24eef97454e68492f7b8881379da827c</li>
+<li><em>enc_file</em>: 52a1995b64b46aa9881e064c4ce877d6</li>
+</ul>
+<p><strong>Challenge Author</strong></p>
+<ul>
+<li>Sejal Koshta: k1n0r4#0712 | <a href="https://twitter.com/k1n0r4">k1n0r4</a></li>
+<li>Sidharth V: retr0ds#2334 | <a href="https://twitter.com/_retr0ds_">_retr0ds_</a></li>
+<li>Adhithya:  AmunRha#6390 | <a href="https://twitter.com/amun_rha">amun_rha</a></li>
+</ul>
+<h1 id="triage">Triage</h1>
+<p>As you can see, this is a PE file and as every malware goes, we can try to put this up in the virus total and see what the initial analysis provides us,</p>
+<p><img src="https://i.imgur.com/ZsVggV7.png" alt=""></p>
+<p><a href="https://www.virustotal.com/gui/file/df1859a23dacc23365f6547af6441cea4e012f6b214762a9e5ed40cf031b22bb/detection">Virustotal Link</a></p>
+<p>Well, looking at a few basic pieces of information we can infer that it is spawning cmd.exe as a child process, perhaps some sort of injection. and it drops two files?</p>
+<p><img src="https://i.imgur.com/2t68RTI.png" alt="">
+<a href="https://www.hybrid-analysis.com/sample/df1859a23dacc23365f6547af6441cea4e012f6b214762a9e5ed40cf031b22bb">Hybrid Analysis Link</a></p>
+<p><img src="https://i.imgur.com/UCapZBP.png" alt=""></p>
+<p><img src="https://i.imgur.com/hNp9Yw8.png" alt="">
+<a href="https://analyze.intezer.com/analyses/11db4601-73b4-4500-a8ce-a387bd8a9f9a/genetic-analysis">Intezer Analyze Link</a></p>
+<p><img src="https://i.imgur.com/YKl1VZq.png" alt="">
+<a href="https://www.unpac.me/results/ccafea2f-8468-45b4-85c1-4ebe73bb2f56">UnpacMe Link</a></p>
+<p>We can proceed with our analysis part knowing the information from the online sandbox</p>
+<h1 id="introduction">Introduction</h1>
+<p>The challenge is malware created to encrypt any flag named &ldquo;flag&rdquo; and output that to a file named &ldquo;enc_file&rdquo;.
+In summary, the challenge implemented the following,</p>
+<ol>
+<li>
+<p>First Stage</p>
+<ul>
+<li>Two SEH Exception handlers</li>
+<li>Process Hollowing</li>
+<li>API Hashing using modified fletcher32</li>
+</ul>
+</li>
+<li>
+<p>Second Stage</p>
+<ul>
+<li>Two VEH Exception handlers</li>
+<li>XXTEA cipher</li>
+<li>Runtime XXTEA constant generation</li>
+<li>Runtime XXTEA key generation</li>
+</ul>
+</li>
+</ol>
+<p>On top of the above implementations we also wrapped the first stage within the class and its member functions.</p>
+<p>The write-up will try to explain some of the authors&rsquo; points of view, how the intended solution is, and some unintended issues that came forth.</p>
+<h1 id="first-stage">First Stage</h1>
+<p>Starting at the main function we can see immediately see the first function being something very familiar across malware samples.</p>
+<p><img src="https://i.imgur.com/fBiEOGP.png" alt=""></p>
+<p>The first function seems to be taking a lot of 7-byte constants and storing them within an array of sorts.</p>
+<p><img src="https://i.imgur.com/1kzy0Av.png" alt=""></p>
+<p>Then we can see that there is a loop running for 14 iterations. Index 1 and 2 go to the control flow where we have the string ntdll.dll and every other index goes to the control flow goes to the block containing kernel32.dll</p>
+<p><img src="https://i.imgur.com/hgNz1a4.png" alt=""></p>
+<p>The function seems to contain the following arguments,</p>
+<ol>
+<li>This pointer</li>
+<li>Name of the dll</li>
+<li>DWORD / 4 bytes of the large constant</li>
+<li>BYTE4 of the constant [ (constant &raquo; 32) &amp; 0xff ]</li>
+<li>3 highest nibbles of the constant</li>
+</ol>
+<p>Looking at the below condition we can figure out what the different parameters are used for,</p>
+<ul>
+<li>Argument 3 -&gt; Used as the result of the hash</li>
+<li>Argument 4 -&gt; Length of winAPI name</li>
+<li>Argument 5 -&gt; Sum of the characters inside the winAPI name</li>
+</ul>
+<p><img src="https://i.imgur.com/xfCsU14.png" alt=""></p>
+<p>So we can conclude that the function is responsible for the return back the function handle depending on the hash, len of name, and summation of the characters in the name. Let&rsquo;s go ahead and rename it as &ldquo;GetFunctionByHash&rdquo;. To reproduce the checksum algorithm, we can either reimplement it in python or try to figure it out from a bit of googling.</p>
+<p>Searching the specific constants within the function, like 0xFFFF and 359 along with the keyword checksum will give us the result of fletcher32
+<img src="https://i.imgur.com/L9AUq4w.png" alt=""></p>
+<p><img src="https://i.imgur.com/0Fuw4YH.png" alt=""></p>
+<p>Going through the open source implementation of the algorithm we can see both are similar to the one in the given malware executable, hence we can rename that function to &ldquo;CalcFletcher32&rdquo;</p>
+<p>Finally, the initial function we reached seems to be a function that does initialization of runtime API loading based on static constants, so we can go ahead and name it &ldquo;InitWinAPI&rdquo;</p>
+<p>The rest of the functions seem to be basic initialization of class objects, we can pass them to the core part of our binary.</p>
+<p><img src="https://i.imgur.com/M3EfJYF.png" alt=""></p>
+<p>The final function in the main function seems to contain a divide by 0 exceptions and its respective handler, this is our first exception handler.</p>
+<blockquote>
+<p>Authors note:
+Exception handlers were created as part of our obfuscation idealogy, decompilation usually fails when there is an exception handler within the program. And debugger is slightly annoying when you have an exception being generated for every session until you configure it to pass</p>
+</blockquote>
+<h2 id="first-seh-exception-handler">First SEH Exception handler</h2>
+<p><img src="https://i.imgur.com/Msqbtv0.png" alt="">
+We can see that two strings are being passed to two different functions, if you have reversed malware before this usually gives you a hunch that some sort of a process injection should be taking place just by noticing the string &ldquo;c:\windows\system32\cmd.exe&rdquo;</p>
+<p>We can see few allocations for variables taking place, but beyond those initializations, we can notice that there is a function that takes the second parameter as an integer, in the first call it takes 0 as the parameter.</p>
+<p><img src="https://i.imgur.com/zAruiWU.png" alt=""></p>
+<p>We can see the above function just retrieves the pointer to the respective winAPI from the array index the other function just stored, so we can go ahead and name it &ldquo;GetFunctionByIndex&rdquo;</p>
+<p><img src="https://i.imgur.com/OwMcqlt.png" alt=""></p>
+<p>If you debug the program and follow the pointer that the function is returning, you would land at the &ldquo;CreateProcessA&rdquo; function, so hence you can go ahead and rename the first call as &ldquo;CreateProcessA&rdquo;</p>
+<p>And debugging the second function call we can rename it as, &ldquo;NtQueryInformationProcess&rdquo;</p>
+<p><img src="https://i.imgur.com/IS1GgDd.png" alt=""></p>
+<p>After renaming, this is what the function looks like, and you can probably recognize that this API routine probably goes over to some kind of process injection.</p>
+<p><img src="https://i.imgur.com/PfQp8Lr.png" alt=""></p>
+<p><img src="https://i.imgur.com/q4ZCrpi.png" alt=""></p>
+<p>The next function seems to be taking our encrypted file name &ldquo;enc_file&rdquo;,</p>
+<p><img src="https://i.imgur.com/7q2XAXu.png" alt=""></p>
+<p>Since we have debugged and figured out where the pointers are pointing to within memory, we can rename the runtime calls to their respective API calls to make more sense.</p>
+<p>And as we can see here, this seems to be calling opening our file and allocating a heap to store the contents of the file it just read.</p>
+<p><img src="https://i.imgur.com/gBDzPht.png" alt=""></p>
+<p>One of the functions we have within has a few stripped CPP functions, either this can be recovered using FLIRT signatures, or through the error log statements within those functions, the summary of the functions is basically to open up &ldquo;enc_file&rdquo;, read the contents of the file and decode them from hex string to decimal values.</p>
+<p><img src="https://i.imgur.com/01BqTr7.png" alt=""></p>
+<p>Further down the line, you can see a few other stripped functions, these functions again can be recovered using FLIRT, but it is easier to recover them by seeing how they behave. Debugging their functionality usually gives you on how the function behaves, such as appending values to an existing list, counting occurrences, etc.</p>
+<p>Since the binary, we are reversing is CPP you can see that STL structures might be within them, the best way to recover them is to write another CPP executable with some basic implementations of the STL libraries and see the similarity between the given and yours. This will eventually help you analyze further CPP binaries, or else the error log statements should help you point down which STL it is.</p>
+<p>We see a huge function is called within the previous read file function, checking the things within it, we can see that IDA is unable to decompile or even show it in the graph view.</p>
+<p><img src="https://i.imgur.com/mLtGgGw.png" alt=""></p>
+<p>We can although view it in the text view of IDA, checking it we can see it seems some sort of storing of values into the stack space</p>
+<p><img src="https://i.imgur.com/77CVncq.png" alt=""></p>
+<p>Debugging the return value of the function, we can see that the function returns a list of huge values.</p>
+<p><img src="https://i.imgur.com/SSkDAWQ.png" alt=""></p>
+<p>In the end, we can see that the function uses the enc_file as an index medium of sorts, and some of them are taken into an allocated heap. Either we can debug and extract whatever it is allocating into that location, or reverse the rest of the things and come back to this location.</p>
+<p>For now, we choose to reverse the final exception handler to see what it might be doing, and what sort of information we could get out of it.</p>
+<h2 id="second-seh-exception-handler">Second SEH Exception handler</h2>
+<p><img src="https://i.imgur.com/19oKzTr.png" alt=""></p>
+<p>We can see another handler block just like the previous one, and annotating the runtime APIs being decrypted, we have the following result,</p>
+<p><img src="https://i.imgur.com/gGtfMH6.png" alt=""></p>
+<p>Here are the function list being loaded during runtime,</p>
+<ul>
+<li>NtUnmapViewOfSection</li>
+<li>VirtualAllocEx</li>
+<li>WriteProcessMemory</li>
+<li>GetThread</li>
+<li>SetThread</li>
+<li>ResumeThread</li>
+</ul>
+<p>This is the standard process hollowing API routine, if you weren&rsquo;t able to guess it from the API routine, you can do a simple google search and that should return the process hollowing as a result.</p>
+<p>So, since we know that the program is implementing process hollowing and the &ldquo;enc_file&rdquo; contains data that is allocated to the heap, which probably by our intuition is going to be executed. We can extract the data by debugging it.</p>
+<p>The rest of the functions are left to the user to be reversed as an exercise and a practice to reverse CPP classes. The source code for this challenge will be linked below, referring to that will help understand the binary better.</p>
+<h1 id="second-stage">Second Stage</h1>
+<p>The second stage of the malware is designed to act as the file encryptor. In a summary, the second stage has reduced obfuscation that is not repeated from the first stage. Said that it contains obfuscation to thwart signature detection of constants and encryptors, and make it run a while longer.</p>
+<p>The second stage contains two exception handlers, but this time we implemented two VEH handlers right in the main function.
+The first handler is responsible for opening up the file and reading the data within it, which in this case is limited to any file named flag.
+The second handler is responsible for encrypting the data within the file and writing it in a custom encoded way which if reversed will eventually lead you to the flag.</p>
+<p>Here is where a few quirky issues came about, which we shall also address as we go through.</p>
+<p><img src="https://i.imgur.com/CT0J1Bn.png" alt=""></p>
+<h2 id="first-veh-handler">First VEH Handler</h2>
+<p><img src="https://i.imgur.com/niahZQu.png" alt=""></p>
+<p>As you can see the function implements the basic functionality of reading the contents of the flag file, and peculiarly deletes the file</p>
+<p>Since there isn&rsquo;t much to talk about over here, we can move further with the second handler</p>
+<h2 id="second-veh-handler">Second VEH Handler</h2>
+<p><img src="https://i.imgur.com/U4Xpn0T.png" alt=""></p>
+<p>The first function call is called twice. We can debug and find out what are the arguments the function is returning, without going through the headache of analyzing it, we can just put a breakpoint before its return statement.</p>
+<blockquote>
+<p>Authors Note: The function was created to generate the xxtea key dynamically with some intended delay.</p>
+</blockquote>
+<p><img src="https://i.imgur.com/NLtAAv6.png" alt=""></p>
+<p>But here is where an unintended issue was encountered, which was also reported by a few participants who tried the challenge. Although the challenge solution was not affected by this, the program behaved strangely under two different scenarios.</p>
+<h2 id="destruction-of-key">Destruction of Key</h2>
+<blockquote>
+<p>Authors Note: This section of the write-up is for explaining what the issue is and what might have caused the issue. Feel free to skip this section if you want to read about how to continue solving the challenge.</p>
+</blockquote>
+<p>We can name the function &ldquo;GenerateKey&rdquo;. That function is supposed to return the key after its call. However as some of you might have noticed, if you debug and put a breakpoint after the function call, and examine the return value in rax, you would notice it does not contain any value, it&rsquo;s just garbage.</p>
+<p><img src="https://i.imgur.com/yCPndci.png" alt=""></p>
+<p><img src="https://i.imgur.com/7mI7mRf.png" alt=""></p>
+<p>But keeping this in mind, there is another situation where this behavior does not exist.</p>
+<p><img src="https://i.imgur.com/e99ZkIB.png" alt=""></p>
+<p><img src="https://i.imgur.com/EfaG2Tr.png" alt=""></p>
+<p><img src="https://i.imgur.com/G1uIq7Q.png" alt=""></p>
+<p>So, what was the difference between the two scenarios? In the first case, we debugged the application straight out of the debugger.</p>
+<p>In the second case, we ran the file, and then attached the debugger in the middle of the process, hence the key still happens to be intact.</p>
+<p>This difference had made a few players confuse, and rechecking the flow of the code, we were also not able to pinpoint any issues with it. After the CTF, and discussing with a few other players who were solving the challenges, we had a hunch as to why it might be happening.</p>
+<p>Since in CPP after every initialization of the program objects, before it is returned the compiler compiles in a bunch of its destructor, the same case here, the string object which should have been returned, was destructed by the compiler. The difference in behavior can <em>probably</em> be attributed to Heap protections in Windows, looking through a couple of forums, and documentation, we were able to get hold of a few suggestions and artifacts stating the same, since the debugger initializes the process the system turns on the debugger protections within the heap, and hence garbage values are returned after destruction, although this doesn&rsquo;t happen to be the case when the process is spawned by the OS and the debugger is attached to it.</p>
+<p>We are not very sure about our hunch, and we would appreciate it if anyone could come forth with an explanation for the behavior above.</p>
+<h2 id="xxtea-yet-again">xxtea yet again</h2>
+<p>Since we retrieved a string that looks like the key, if we further debug and see the unknown function we can see the following details, and hence rename the functions accordingly.</p>
+<p><img src="https://i.imgur.com/KSCIIoA.png" alt=""></p>
+<p><img src="https://i.imgur.com/5FyP7b1.png" alt=""></p>
+<p>If seen before, it is highly likely that you can guess that this is xxtea cipher implementation, in case you weren&rsquo;t able to figure that out, another possible method would have been to use the findcrypt plugin for IDA, but then we designed the challenge to remove any cryptographic constants necessary to the solve, and generated them during runtime to make it a bit harder to just yara match it. If you notice that it takes time to generate the constant, you can perhaps breakpoint and retrieve the constant value from the internal of the function,</p>
+<p><img src="https://i.imgur.com/UbIzoDd.png" alt=""></p>
+<p><img src="https://i.imgur.com/2rE0BsC.png" alt=""></p>
+<h2 id="retrieving-the-flag">Retrieving the flag</h2>
+<p>Now the final part is to figure out the byte order that the flag stored within the encrypted file given,</p>
+<p><img src="https://i.imgur.com/cUGwEj3.png" alt=""></p>
+<p>Looking at the final function we can see a lot of shuffling happening, carefully examining it leads us to two different files being shuffled,</p>
+<ul>
+<li>The encrypted flag contents</li>
+<li>Self-executable contents</li>
+</ul>
+<p>So the binary shuffles the encrypted flag and its executable contents and stores them in a file named &ldquo;enc_file&rdquo;</p>
+<blockquote>
+<p>Authors Note: There are a lot of unnecessary function calls in between the legitimate calls, this was just useless code that does not correspond to any of the later logic</p>
+</blockquote>
+<p>Using FLIRT or your reversing experience, you can figure out that the key we are generating like last time is also being used here to generate a range of index values, and stored within a list. The length of the list is the same as the length of the encrypted content.</p>
+<p><img src="https://i.imgur.com/s1yzMzr.png" alt=""></p>
+<p>So we can infer that the index range it produces is going to stay constant, cause the seed value initialized for the random generator is provided by the xxtea key.</p>
+<p>We can extract those values right from the memory or, if you remember well, you will also notice that these index values are given as a function unable to be disassembled due to its length by IDA in the first stage of the malware.</p>
+<p>If we go further down the function and analyze the logic, it is very clear that the function merely places either our encrypted flag contents or the executable contents in the specified list indexes.</p>
+<p><img src="https://i.imgur.com/dokdY65.png" alt=""></p>
+<p>From the first stage of the binary, we can notice that the list of generated indexes is used to store the encrypted flag contents and not the executable, so we can confirm one of those possibilities.</p>
+<h1 id="finale">Finale</h1>
+<p>Since we have everything to retrieve back the flag file, we can write a simple python script to extract and decrypt the &ldquo;enc_file&rdquo;</p>
+<ul>
+<li>XXTEA encryption algorithm</li>
+<li>XXTEA key</li>
+<li>Indexes of the encrypted flag contents</li>
+</ul>
+<p>Here is the python script,</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#ff79c6">import</span> subprocess
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">import</span> xxtea
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">from</span> extracted_index <span style="color:#ff79c6">import</span> enc_idx_list
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>xxtea_key <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;6745112157269426695112118162937&#34;</span>[:<span style="color:#bd93f9">16</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">def</span> <span style="color:#50fa7b">read_file</span>(filename):
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">with</span> <span style="color:#8be9fd;font-style:italic">open</span>(filename) <span style="color:#ff79c6">as</span> f:
+</span></span><span style="display:flex;"><span>		data <span style="color:#ff79c6">=</span> f<span style="color:#ff79c6">.</span>read()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> data
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">def</span> <span style="color:#50fa7b">write_file</span>(filename, enc_list):
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">with</span> <span style="color:#8be9fd;font-style:italic">open</span>(filename, <span style="color:#f1fa8c">&#39;wb&#39;</span>) <span style="color:#ff79c6">as</span> f:
+</span></span><span style="display:flex;"><span>		f<span style="color:#ff79c6">.</span>write(<span style="color:#8be9fd;font-style:italic">bytes</span>(enc_list))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">def</span> <span style="color:#50fa7b">main</span>():
+</span></span><span style="display:flex;"><span>	inp_filename <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;enc_file&#34;</span>
+</span></span><span style="display:flex;"><span>	out_filename <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;output.dat&#34;</span>
+</span></span><span style="display:flex;"><span>	raw_data <span style="color:#ff79c6">=</span> read_file(inp_filename)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	data <span style="color:#ff79c6">=</span> raw_data<span style="color:#ff79c6">.</span>split(<span style="color:#f1fa8c">&#34; &#34;</span>)
+</span></span><span style="display:flex;"><span>	src_sz <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">int</span>(data[<span style="color:#bd93f9">0</span>], <span style="color:#bd93f9">16</span>)
+</span></span><span style="display:flex;"><span>	enc_sz <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">int</span>(data[<span style="color:#bd93f9">1</span>], <span style="color:#bd93f9">16</span>)
+</span></span><span style="display:flex;"><span>	data <span style="color:#ff79c6">=</span> [<span style="color:#8be9fd;font-style:italic">int</span>(i, <span style="color:#bd93f9">16</span>) <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">in</span> data[<span style="color:#bd93f9">2</span>:<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>]]
+</span></span><span style="display:flex;"><span>	total_sz <span style="color:#ff79c6">=</span> src_sz <span style="color:#ff79c6">+</span> enc_sz
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">print</span>(<span style="color:#f1fa8c">&#34;[*] XXTEA Key:&#34;</span>, xxtea_key)
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">print</span>(<span style="color:#f1fa8c">&#34;[*] Input filename:&#34;</span>, inp_filename)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	enc_bytes <span style="color:#ff79c6">=</span> []
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">in</span> enc_idx_list:
+</span></span><span style="display:flex;"><span>		enc_bytes<span style="color:#ff79c6">.</span>append(data[i])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	dec_data <span style="color:#ff79c6">=</span> xxtea<span style="color:#ff79c6">.</span>decrypt(<span style="color:#8be9fd;font-style:italic">bytes</span>(enc_bytes), xxtea_key[:<span style="color:#bd93f9">16</span>], padding<span style="color:#ff79c6">=</span><span style="color:#ff79c6">False</span>)
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	write_file(out_filename, dec_data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">print</span>(<span style="color:#f1fa8c">&#34;[*] Contents have been decrypted&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">print</span>(<span style="color:#f1fa8c">&#34;[*] Output filename:&#34;</span>, out_filename)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>main()
+</span></span></code></pre></div><p><img src="https://i.imgur.com/kZKXjUJ.png" alt=""></p>
+<p>Examine the contents in a hex editor, and you will notice that it is a PNG, open the file as a PNG and you would see the flag,
+<img src="https://i.imgur.com/iYvZ41c.png" alt=""></p>
+<p><img src="https://i.imgur.com/NR4SbKK.png" alt=""></p>
+<p>Hence, successfully solving the challenge. This write-up tries to show you another method of solving, scroll down further to read how you could avoid reversing the first stage and fast forward to the second stage.</p>
+<h1 id="alternative---first-stage">Alternative - First Stage</h1>
+<p>If you are not a fan of core reversing the malware and understanding its behavior, you could use some of the awesome tools out there to analyze the sample, and this could cut down your efforts to extract the second stage without much effort.</p>
+<h2 id="malunpack--pe---sieve">MalUnpack / PE - Sieve</h2>
+<p><img src="https://i.imgur.com/vqXF5na.png" alt=""></p>
+<p>MalUnpack is a tool built on top of the PE-Sieve engine built by hasherezade. You can use it to automatically unpack any suspicious process, and by running this with our binary, we can extract the second stage automatically.</p>
+<p><img src="https://i.imgur.com/Ipzq0v5.png" alt=""></p>
+<p>dump_report.json</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;pid&#34;</span> : <span style="color:#bd93f9">1220</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;output_dir&#34;</span> : <span style="color:#f1fa8c">&#34;process_1220&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;dumped&#34;</span> : 
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">&#34;total&#34;</span> : <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">&#34;dumped&#34;</span> : <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;dumps&#34;</span> : [
+</span></span><span style="display:flex;"><span>   {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;module&#34;</span> : <span style="color:#f1fa8c">&#34;7ff676c90000&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;module_size&#34;</span> : <span style="color:#f1fa8c">&#34;13000&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;dump_file&#34;</span> : <span style="color:#f1fa8c">&#34;7ff676c90000.exe&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;dump_mode&#34;</span> : <span style="color:#f1fa8c">&#34;UNMAPPED&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;is_shellcode&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;status&#34;</span> : <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>   }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span> }
+</span></span></code></pre></div><p>scan_report.json</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;pid&#34;</span> : <span style="color:#bd93f9">1220</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;is_64_bit&#34;</span> : <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;is_managed&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;main_image_path&#34;</span> : <span style="color:#f1fa8c">&#34;C:\\Windows\\System32\\cmd.exe&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;used_reflection&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;scanned&#34;</span> : 
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">&#34;total&#34;</span> : <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">&#34;skipped&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">&#34;modified&#34;</span> : 
+</span></span><span style="display:flex;"><span>   {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;total&#34;</span> : <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;patched&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;iat_hooked&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;replaced&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;hdr_modified&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;implanted_pe&#34;</span> : <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;implanted_shc&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;unreachable_file&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;other&#34;</span> : <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span>   },
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">&#34;errors&#34;</span> : <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">&#34;scans&#34;</span> : [
+</span></span><span style="display:flex;"><span>   {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;workingset_scan&#34;</span> : {
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;module&#34;</span> : <span style="color:#f1fa8c">&#34;7ff676c90000&#34;</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;module_size&#34;</span> : <span style="color:#f1fa8c">&#34;13000&#34;</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;status&#34;</span> : <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;has_pe&#34;</span> : <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;has_shellcode&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;is_listed_module&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;protection&#34;</span> : <span style="color:#f1fa8c">&#34;40&#34;</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;mapping_type&#34;</span> : <span style="color:#f1fa8c">&#34;MEM_PRIVATE&#34;</span>,
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">&#34;pe_artefacts&#34;</span> : {
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">&#34;pe_base_offset&#34;</span> : <span style="color:#f1fa8c">&#34;0&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">&#34;nt_file_hdr&#34;</span> : <span style="color:#f1fa8c">&#34;104&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">&#34;sections_hdrs&#34;</span> : <span style="color:#f1fa8c">&#34;208&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">&#34;sections_count&#34;</span> : <span style="color:#bd93f9">6</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">&#34;is_dll&#34;</span> : <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">&#34;is_64_bit&#34;</span> : <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>     }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>   }
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span> }
+</span></span></code></pre></div><p>Hence, you can easily extract the second stage and reverse the rest of the binary logic from there.</p>
+<h1 id="closing-note">Closing Note</h1>
+<p>We thank you for playing the CTF and would love to hear some feedback about the challenge.
+If you have any queries regarding the challenge, feel free to hit me up over twitter/email.</p>
+</section>
+
+  
+    
+  
+
+    
+  
+
+
+  <footer>
+    
+      <div class="pb-14 taxonomy-list tags-list">
+      
+        <a href="/tags/malware/" alt="Malware">
+          Malware
+        </a>
+      
+        <a href="/tags/exe/" alt="EXE">
+          EXE
+        </a>
+      
+      </div>
+    
+  </footer>
+</article>
+
+
+    </main><footer class="pt-5 pb-10 grid gap-3 sm:grid-cols-2">
+    <div class="text-xs font-semibold text-gray-500 order-2 sm:order-1">
+  © 2024 —
+  <a href="http://localhost:1313/">AmunRha&#39;s Blog</a> 
+  <span class="font-normal">with</span>
+  <a
+    href="https://github.com/nixentric/Lowkey-Hugo-Theme"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Lowkey
+  </a>
+</div>
+
+    <div class="order-1 sm:order-2">
+  <ul class="flex sm:justify-end gap-5">
+    
+    
+    <li>    
+      <a href="https://twitter.com/amun_rha" target="_blank" rel="noopener noreferrer">Twitter</a>
+    </li>
+    
+    <li>    
+      <a href="https://linkedin.com/in/adhithyasureshk" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    </li>
+    
+    <li>    
+      <a href="https://github.com/AmunRha" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </li>
+    
+    
+  </ul>
+</div>
+
+</footer></body>
+</html>

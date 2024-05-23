@@ -1,0 +1,43 @@
+[[main]]
+    identifier = "about"
+    name = "About me"
+    url = "/"
+    weight = 1
+
+[[main]]
+    identifier = "posts"
+    name = "Posts"
+    url = "/posts"
+    weight = 2
+
+[[main]]
+    identifier = "categories"
+    name = "Categories"
+    url = "/categories"
+    weight = 3
+
+[[main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags"
+    weight = 4
+    
+# Social Media Configuration
+
+[[social]]
+    identifier = "twitter"
+    name = "Twitter"
+    url = "https://twitter.com/amun_rha"
+    weight = 1
+
+[[social]]
+    identifier = "linkedin"
+    name = "LinkedIn"
+    url = "https://linkedin.com/in/adhithyasureshk"
+    weight = 2
+
+[[social]]
+    identifier = "github"
+    name = "GitHub"
+    url = "https://github.com/AmunRha"
+    weight = 3
