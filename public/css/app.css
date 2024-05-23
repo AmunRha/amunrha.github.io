@@ -1128,9 +1128,9 @@ video {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity));
 }
-.text-red-900 {
+.text-rose-500 {
   --tw-text-opacity: 1;
-  color: rgb(127 29 29 / var(--tw-text-opacity));
+  color: rgb(244 63 94 / var(--tw-text-opacity));
 }
 nav a.active {
   --tw-text-opacity: 1;
