@@ -2,25 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>EXE on AmunRha&#39;s Blog</title>
-    <link>http://amunrha.github.io/tags/exe/</link>
+    <link>http://localhost:1313/tags/exe/</link>
     <description>Recent content in EXE on AmunRha&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-US</language>
     <copyright>{year}</copyright>
     <lastBuildDate>Fri, 10 Feb 2023 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://amunrha.github.io/tags/exe/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/tags/exe/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>BlueLock | Windows Malware | bi0sCTF 2022</title>
-      <link>http://amunrha.github.io/posts/bluelock_bi0sctf23/</link>
+      <link>http://localhost:1313/posts/bluelock_bi0sctf23/</link>
       <pubDate>Fri, 10 Feb 2023 00:00:00 +0000</pubDate>
-      <guid>http://amunrha.github.io/posts/bluelock_bi0sctf23/</guid>
+      <guid>http://localhost:1313/posts/bluelock_bi0sctf23/</guid>
       <description>tl;dr&#xA;Implemented two SEH and two VEH Exception Handlers Two stage malware challenge with process injection technique CPP binary where logic is wrapped in classes and their member functions Challenge points: 1000</description>
     </item>
     <item>
       <title>Confirmation of Identity | HTB Finals 2021</title>
-      <link>http://amunrha.github.io/posts/confirmationofidentity_htbfinals21/</link>
+      <link>http://localhost:1313/posts/confirmationofidentity_htbfinals21/</link>
       <pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate>
-      <guid>http://amunrha.github.io/posts/confirmationofidentity_htbfinals21/</guid>
+      <guid>http://localhost:1313/posts/confirmationofidentity_htbfinals21/</guid>
       <description>Description I wrote this advanced program to only work on my computer but I think I might have made a mistake somewhere, as I can&amp;rsquo;t even confirm my own identity.</description>
     </item>
   </channel>

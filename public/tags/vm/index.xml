@@ -2,39 +2,39 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>VM on AmunRha&#39;s Blog</title>
-    <link>http://amunrha.github.io/tags/vm/</link>
+    <link>http://localhost:1313/tags/vm/</link>
     <description>Recent content in VM on AmunRha&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-US</language>
     <copyright>{year}</copyright>
     <lastBuildDate>Sat, 26 Jun 2021 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://amunrha.github.io/tags/vm/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/tags/vm/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>hell86 VM Crackme | by ttlhacker</title>
-      <link>http://amunrha.github.io/posts/hell86vm_ttlhacker/</link>
+      <link>http://localhost:1313/posts/hell86vm_ttlhacker/</link>
       <pubDate>Sat, 26 Jun 2021 00:00:00 +0000</pubDate>
-      <guid>http://amunrha.github.io/posts/hell86vm_ttlhacker/</guid>
+      <guid>http://localhost:1313/posts/hell86vm_ttlhacker/</guid>
       <description>Description x86_64 linux binary (tested on debian 9 and ubuntu 18.04, should run on any distro).</description>
     </item>
     <item>
       <title>Discount VMProtect | X-MAS CTF 2019</title>
-      <link>http://amunrha.github.io/posts/discountvmprotect_xmasctf19/</link>
+      <link>http://localhost:1313/posts/discountvmprotect_xmasctf19/</link>
       <pubDate>Sat, 29 May 2021 00:00:00 +0000</pubDate>
-      <guid>http://amunrha.github.io/posts/discountvmprotect_xmasctf19/</guid>
+      <guid>http://localhost:1313/posts/discountvmprotect_xmasctf19/</guid>
       <description>Challenge Author: avlad171&#xA;This is a simple stack based VM challenge. We can solve this in two different ways.</description>
     </item>
     <item>
       <title>Crackme | 3kctf 2021</title>
-      <link>http://amunrha.github.io/posts/crackme_3kctf21/</link>
+      <link>http://localhost:1313/posts/crackme_3kctf21/</link>
       <pubDate>Mon, 17 May 2021 00:00:00 +0000</pubDate>
-      <guid>http://amunrha.github.io/posts/crackme_3kctf21/</guid>
+      <guid>http://localhost:1313/posts/crackme_3kctf21/</guid>
       <description>Description Challenge Author: KERRO, Aziz&#xA;Challenge Overview The challenge is a VM crackme challenge with 4 registers and a location to store data and opcodes.</description>
     </item>
     <item>
       <title>2k | redpwnctf21</title>
-      <link>http://amunrha.github.io/posts/2k_redpwnctf21/</link>
+      <link>http://localhost:1313/posts/2k_redpwnctf21/</link>
       <pubDate>Fri, 19 Mar 2021 00:00:00 +0000</pubDate>
-      <guid>http://amunrha.github.io/posts/2k_redpwnctf21/</guid>
+      <guid>http://localhost:1313/posts/2k_redpwnctf21/</guid>
       <description>Description Challenge Author: EvilMuffinHa&#xA;Introduction This is a simple VM which has around 25-27 opcodes with instructions simple enough to be emulated.</description>
     </item>
   </channel>
