@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>PINtools on AmunRha&#39;s Blog</title>
-    <link>http://localhost:1313/tags/pintools/</link>
+    <link>http://amunrha.github.io/tags/pintools/</link>
     <description>Recent content in PINtools on AmunRha&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-US</language>
     <copyright>{year}</copyright>
     <lastBuildDate>Sat, 29 May 2021 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/pintools/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://amunrha.github.io/tags/pintools/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Discount VMProtect | X-MAS CTF 2019</title>
-      <link>http://localhost:1313/posts/discountvmprotect_xmasctf19/</link>
+      <link>http://amunrha.github.io/posts/discountvmprotect_xmasctf19/</link>
       <pubDate>Sat, 29 May 2021 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/discountvmprotect_xmasctf19/</guid>
+      <guid>http://amunrha.github.io/posts/discountvmprotect_xmasctf19/</guid>
       <description>Challenge Author: avlad171&#xA;This is a simple stack based VM challenge. We can solve this in two different ways.</description>
     </item>
   </channel>

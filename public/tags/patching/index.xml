@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Patching on AmunRha&#39;s Blog</title>
-    <link>http://localhost:1313/tags/patching/</link>
+    <link>http://amunrha.github.io/tags/patching/</link>
     <description>Recent content in Patching on AmunRha&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-US</language>
     <copyright>{year}</copyright>
     <lastBuildDate>Sun, 21 Mar 2021 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/patching/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://amunrha.github.io/tags/patching/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Confirmation of Identity | HTB Finals 2021</title>
-      <link>http://localhost:1313/posts/confirmationofidentity_htbfinals21/</link>
+      <link>http://amunrha.github.io/posts/confirmationofidentity_htbfinals21/</link>
       <pubDate>Sun, 21 Mar 2021 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/confirmationofidentity_htbfinals21/</guid>
+      <guid>http://amunrha.github.io/posts/confirmationofidentity_htbfinals21/</guid>
       <description>Description I wrote this advanced program to only work on my computer but I think I might have made a mistake somewhere, as I can&amp;rsquo;t even confirm my own identity.</description>
     </item>
   </channel>

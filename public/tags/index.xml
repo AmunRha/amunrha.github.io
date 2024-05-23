@@ -2,81 +2,81 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on AmunRha&#39;s Blog</title>
-    <link>http://localhost:1313/tags/</link>
+    <link>http://amunrha.github.io/tags/</link>
     <description>Recent content in Tags on AmunRha&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-US</language>
     <copyright>{year}</copyright>
     <lastBuildDate>Fri, 10 Feb 2023 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://amunrha.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>EXE</title>
-      <link>http://localhost:1313/tags/exe/</link>
+      <link>http://amunrha.github.io/tags/exe/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/exe/</guid>
+      <guid>http://amunrha.github.io/tags/exe/</guid>
       <description></description>
     </item>
     <item>
       <title>Malware</title>
-      <link>http://localhost:1313/tags/malware/</link>
+      <link>http://amunrha.github.io/tags/malware/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/malware/</guid>
+      <guid>http://amunrha.github.io/tags/malware/</guid>
       <description></description>
     </item>
     <item>
       <title>Crackme</title>
-      <link>http://localhost:1313/tags/crackme/</link>
+      <link>http://amunrha.github.io/tags/crackme/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/crackme/</guid>
+      <guid>http://amunrha.github.io/tags/crackme/</guid>
       <description></description>
     </item>
     <item>
       <title>VM</title>
-      <link>http://localhost:1313/tags/vm/</link>
+      <link>http://amunrha.github.io/tags/vm/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/vm/</guid>
+      <guid>http://amunrha.github.io/tags/vm/</guid>
       <description></description>
     </item>
     <item>
       <title>PINtools</title>
-      <link>http://localhost:1313/tags/pintools/</link>
+      <link>http://amunrha.github.io/tags/pintools/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/pintools/</guid>
+      <guid>http://amunrha.github.io/tags/pintools/</guid>
       <description></description>
     </item>
     <item>
       <title>Patching</title>
-      <link>http://localhost:1313/tags/patching/</link>
+      <link>http://amunrha.github.io/tags/patching/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/patching/</guid>
+      <guid>http://amunrha.github.io/tags/patching/</guid>
       <description></description>
     </item>
     <item>
       <title>.NET</title>
-      <link>http://localhost:1313/tags/.net/</link>
+      <link>http://amunrha.github.io/tags/.net/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/.net/</guid>
+      <guid>http://amunrha.github.io/tags/.net/</guid>
       <description></description>
     </item>
     <item>
       <title>Crypto</title>
-      <link>http://localhost:1313/tags/crypto/</link>
+      <link>http://amunrha.github.io/tags/crypto/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/crypto/</guid>
+      <guid>http://amunrha.github.io/tags/crypto/</guid>
       <description></description>
     </item>
     <item>
       <title>CTF</title>
-      <link>http://localhost:1313/tags/ctf/</link>
+      <link>http://amunrha.github.io/tags/ctf/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/ctf/</guid>
+      <guid>http://amunrha.github.io/tags/ctf/</guid>
       <description></description>
     </item>
     <item>
       <title>Z3</title>
-      <link>http://localhost:1313/tags/z3/</link>
+      <link>http://amunrha.github.io/tags/z3/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/tags/z3/</guid>
+      <guid>http://amunrha.github.io/tags/z3/</guid>
       <description></description>
     </item>
   </channel>
