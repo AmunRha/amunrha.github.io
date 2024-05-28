@@ -2,23 +2,37 @@ User-agent: *
 
 Disallow: /
 
-Disallow: /posts/bluelock_bi0sctf23/
-
 Disallow: /categories/
+
+Disallow: /tags/exceptions/
+
+Disallow: /tags/malware/
+
+Disallow: /categories/malware-development/
+
+Disallow: /categories/offensive-security/
+
+Disallow: /posts/
+
+Disallow: /tags/redteaming/
+
+Disallow: /tags/seh/
+
+Disallow: /posts/seh_veh_security_perspective/
+
+Disallow: /tags/
+
+Disallow: /tags/veh/
+
+Disallow: /posts/bluelock_bi0sctf23/
 
 Disallow: /categories/ctf/
 
 Disallow: /tags/exe/
 
-Disallow: /tags/malware/
-
 Disallow: /categories/malware/
 
-Disallow: /posts/
-
 Disallow: /categories/reverse-engineering/
-
-Disallow: /tags/
 
 Disallow: /tags/crackme/
 
