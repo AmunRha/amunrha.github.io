@@ -22,3 +22,5 @@ Some of my research interest include,
 Feel free to contact me over,
 
 [Twitter](https://twitter.com/amun_rha) | [LinkedIn](https://linkedin.com/in/adhithyasureshk) | [E-Mail](mailto:adhithyasureshk@gmail.com)
+
+*p.s. please contact me for my cv/resume, it shall be provided upon request* :)
