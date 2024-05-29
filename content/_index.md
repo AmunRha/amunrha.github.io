@@ -19,8 +19,6 @@ Some of my research interest include,
 - Windows Kernel Security
 - and occasionally dabble with Vulnerability Research
 
-Feel free to contact me over,
+Socials: [Twitter](https://twitter.com/amun_rha) | [LinkedIn](https://linkedin.com/in/adhithyasureshk) | [E-Mail](mailto:adhithyasureshk@gmail.com)
 
-[Twitter](https://twitter.com/amun_rha) | [LinkedIn](https://linkedin.com/in/adhithyasureshk) | [E-Mail](mailto:adhithyasureshk@gmail.com)
-
-*p.s. please contact me for my cv/resume, it shall be provided upon request* :)
+*p.s. feel free to contact me for my cv/resume, it shall be provided upon request* :)
