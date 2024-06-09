@@ -378,7 +378,7 @@ Similar to the possibilities mentioned above, we can also modify the RIP to over
 
 One technique that is most commonly used within the malware domain is to use windows syscalls that is used to circumvent any hooking mechanism that might have been placed by the EDR within the general functions used in `ntdll.dll` . This is a common detection mechanism by an AV/EDR. 
 
-Although, the usage of syscall works to bypass the detection, this results in another possible detection mechanism. Using syscalls within your own program is called direct syscall technique, whereas invoking syscalls from another process such as the library itself is called indirect syscall technique.
+Although, the usage of syscall works to bypass the detection, this results in another possible detection mechanism. Using syscalls within your own process without any redirection to another library is called direct syscall technique, whereas invoking syscalls from the library `ntdll.dll` of the process is called an indirect syscall technique.
 
 When using syscalls within your own program, it can usually get caught either by simple signature, assuming you bypassed that, it can be caught be checking the origin of the syscall. Typical origin of the syscall takes place via legitimate sources like the `ntdll.dll` itself, but when that is not the case, it spins up a major red flag. This can be avoided using, well you guessed it ! Vectored Exception Handling !!
 
@@ -421,6 +421,8 @@ Please give the mentioned blogpost a read in order to dive deeper into how this 
 ## Conclusion
 
 In this blog post, I have tried to explain some of the concept used in SEH and VEH programming that I have came across while performing malware analysis, playing CTFs, etc. There definitely exists a lot more tricks than the mentioned and if one is creative enough, further more can be found out as this is still an uncharted territory. This hopefully serves as a blog post that touches some light on this subject and gives the reader something to take away. 
+
+As a future work that I have not covered in this blog post are, how to use VEH as a debugger (used in cheatengine), using VEH to bypass protections and memory scanners, etc.
 
 Thanks for reading this post, and please let me know your feedback through my contacts, any and all feedback helps ! Feel free to DM me if you would like to have further discussions on this topic too! 
 
