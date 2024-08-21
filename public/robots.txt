@@ -4,7 +4,11 @@ Disallow: /
 
 Disallow: /categories/
 
+Disallow: /tags/edr/
+
 Disallow: /tags/exceptions/
+
+Disallow: /posts/layeredsyscall_whiteknightlabs/
 
 Disallow: /tags/malware/
 
@@ -23,6 +27,8 @@ Disallow: /posts/seh_veh_security_perspective/
 Disallow: /tags/
 
 Disallow: /tags/veh/
+
+Disallow: /tags/windows/
 
 Disallow: /posts/bluelock_bi0sctf23/
 

@@ -16,8 +16,6 @@
 
 <link rel="icon" type="image/x-icon" href="/icons/japanese-gate.png" />
 
-
-
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });</script>
 
@@ -32,7 +30,7 @@
 <div class="flex-none w-20 h-20 rounded-full overflow-hidden">
   <a href="http://localhost:1313/">
     <img
-      srcset="/img/wolf_square_hu5e2579434ed3290475748bc13fedcedd_222499_80x80_fill_q90_box_smart1.jpg 80w"
+      srcset="/img/wolf_square_hu12218815234515754814.jpg 80w"
       src="/img/wolf_square.jpg"
       width="978"
       height="1214"
@@ -693,7 +691,7 @@
 <h4 id="3---indirect-syscall">#3 - Indirect syscall</h4>
 <p>Similar to the possibilities mentioned above, we can also modify the RIP to overwrite it with an address within the <code>ntdll.dll</code> library to perform an indirect syscall.</p>
 <p>One technique that is most commonly used within the malware domain is to use windows syscalls that is used to circumvent any hooking mechanism that might have been placed by the EDR within the general functions used in <code>ntdll.dll</code> . This is a common detection mechanism by an AV/EDR.</p>
-<p>Although, the usage of syscall works to bypass the detection, this results in another possible detection mechanism. Using syscalls within your own program is called direct syscall technique, whereas invoking syscalls from another process such as the library itself is called indirect syscall technique.</p>
+<p>Although, the usage of syscall works to bypass the detection, this results in another possible detection mechanism. Using syscalls within your own process without any redirection to another library is called direct syscall technique, whereas invoking syscalls from the library <code>ntdll.dll</code> of the process is called an indirect syscall technique.</p>
 <p>When using syscalls within your own program, it can usually get caught either by simple signature, assuming you bypassed that, it can be caught be checking the origin of the syscall. Typical origin of the syscall takes place via legitimate sources like the <code>ntdll.dll</code> itself, but when that is not the case, it spins up a major red flag. This can be avoided using, well you guessed it ! Vectored Exception Handling !!</p>
 <p>As mentioned in this blog post, <a href="https://redops.at/en/blog/syscalls-via-vectored-exception-handling">“Syscalls via Vectored Exception Handling”</a>, this technique also provides a very legitimate looking call stack when analyzing. This is helps in reducing the detection possibility by a huge margin.</p>
 <p>To brief up a little bit, syscalls are a piece of instruction that is responsible to switch the context from user-mode to kernel-mode. Many of the functions that are used within any process finally is a single or a combination of syscalls that is usually found within the <code>ntdll.dll</code> . This dll contains the final wrapper for several of the system calls used.</p>
@@ -760,6 +758,7 @@
 <p>Please give the mentioned blogpost a read in order to dive deeper into how this concept works. This method can be used in combination of several other methods in order to evade defenses, creativity is the only limit here.</p>
 <h2 id="conclusion">Conclusion</h2>
 <p>In this blog post, I have tried to explain some of the concept used in SEH and VEH programming that I have came across while performing malware analysis, playing CTFs, etc. There definitely exists a lot more tricks than the mentioned and if one is creative enough, further more can be found out as this is still an uncharted territory. This hopefully serves as a blog post that touches some light on this subject and gives the reader something to take away.</p>
+<p>As a future work that I have not covered in this blog post are, how to use VEH as a debugger (used in cheatengine), using VEH to bypass protections and memory scanners, etc.</p>
 <p>Thanks for reading this post, and please let me know your feedback through my contacts, any and all feedback helps ! Feel free to DM me if you would like to have further discussions on this topic too!</p>
 <p>Stay tuned for more and have a great day !</p>
 <p>Contact: <a href="https://twitter.com/amun_rha">Twitter</a> | <a href="https://linkedin.com/in/adhithyasureshk">LinkedIn</a></p>
@@ -809,6 +808,10 @@
       
         <a href="/tags/redteaming/" alt="RedTeaming">
           RedTeaming
+        </a>
+      
+        <a href="/tags/windows/" alt="Windows">
+          Windows
         </a>
       
       </div>

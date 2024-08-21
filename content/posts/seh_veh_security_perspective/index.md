@@ -12,6 +12,7 @@ tags:
   - Exceptions
   - Malware
   - RedTeaming
+  - Windows
 tableOfContents: true
 ---
 

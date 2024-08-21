@@ -6,12 +6,12 @@
 <meta charset="UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Patching</title>
+<title>LayeredSyscall – Abusing VEH to Bypass EDRs</title>
 <meta
   name="description"
-  content=""
+  content="A blogpost and a tool on how to abuse Vectored Exception Handling (VEH) along with indirect syscalls to produce legitimate call stack without manually constructing them."
 />
-<link rel="canonical" href="http://localhost:1313/tags/patching/" />
+<link rel="canonical" href="http://localhost:1313/posts/layeredsyscall_whiteknightlabs/" />
 <link rel="robots" href="/robots.txt" />
 
 <link rel="icon" type="image/x-icon" href="/icons/japanese-gate.png" />
@@ -192,56 +192,65 @@
 
   <main id="content">
 
+<article class="flex flex-col gap-10">
+  <header class="flex flex-col gap-2">
+    <h1 class="title-large">LayeredSyscall – Abusing VEH to Bypass EDRs</h2>
 
-
-
-<div class="flex flex-col gap-1">
-  <h2 class="text-2xl font-extrabold">
-    
-      Patching
+    <div class="meta">
       
-    </h2>
-  
-  
-</div>
-
-<section class="pb-10 flex flex-col gap-5">
-  
-    <hr />
-<article class="flex flex-col gap-1">
-  <h1 class="hover:decoration-rose-400">
-    <p class="inline text-xl text-rose-500 hover:text-rose-400 pr-1">#</p><a href="http://localhost:1313/posts/confirmationofidentity_htbfinals21/">Confirmation of Identity | HTB Finals 2021</a>
-  </h1>
-  
-  <span class="date">
-    <time datetime="2021-03-21 00:00:00 &#43;0000 UTC" title='Sun, Mar 21, 2021, 12:00 AM UTC'>
-        21/03/2021 - Estimated reading time: 2 minutes
+      <time datetime="2024-05-28 00:00:00 &#43;0000 UTC" title='Tue, May 28, 2024, 12:00 AM UTC'>
+        28/05/2024 - Estimated reading time: 1 minutes
       </time>
-  </span>
 
-  <div class="description">
-    
-      This was a nice challenge which dealt with patching the windows binary.
-    
-  </div>
-
-  <div class="mt-2">
-    <a class="read-more" href="http://localhost:1313/posts/confirmationofidentity_htbfinals21/">
-      Read more
-      <span class="w-4 h-4 stroke-2">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-</svg>
-
-      </span>
-    </a>
-  </div>
-</article>
+       
+       — 
+        
+          <a class="categories" href="/categories/offensive-security/" alt="Offensive Security">
+            Offensive Security
+          </a>
+         
+      
+    </div>
+  </header>
 
   
+
+  <section><p>Read the full article over here: <a href="https://whiteknightlabs.com/2024/07/31/layeredsyscall-abusing-veh-to-bypass-edrs/">https://whiteknightlabs.com/2024/07/31/layeredsyscall-abusing-veh-to-bypass-edrs/</a></p>
+<p>Check out the tool over here: <a href="https://github.com/WKL-Sec/LayeredSyscall">https://github.com/WKL-Sec/LayeredSyscall</a></p>
 </section>
 
+  
+    
+  
 
+    
+  
+
+
+  <footer>
+    
+      <div class="pb-14 taxonomy-list tags-list">
+      
+        <a href="/tags/edr/" alt="EDR">
+          EDR
+        </a>
+      
+        <a href="/tags/veh/" alt="VEH">
+          VEH
+        </a>
+      
+        <a href="/tags/redteaming/" alt="RedTeaming">
+          RedTeaming
+        </a>
+      
+        <a href="/tags/windows/" alt="Windows">
+          Windows
+        </a>
+      
+      </div>
+    
+  </footer>
+</article>
 
 
   </main><footer class="pt-5 pb-10 grid gap-3 sm:grid-cols-2">

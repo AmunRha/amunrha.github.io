@@ -10,6 +10,13 @@
     <lastBuildDate>Tue, 28 May 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/tags/veh/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>LayeredSyscall – Abusing VEH to Bypass EDRs</title>
+      <link>http://localhost:1313/posts/layeredsyscall_whiteknightlabs/</link>
+      <pubDate>Tue, 28 May 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/layeredsyscall_whiteknightlabs/</guid>
+      <description>Read the full article over here: https://whiteknightlabs.com/2024/07/31/layeredsyscall-abusing-veh-to-bypass-edrs/&#xA;Check out the tool over here: https://github.com/WKL-Sec/LayeredSyscall</description>
+    </item>
+    <item>
       <title>SEH &amp; VEH in a security perspective</title>
       <link>http://localhost:1313/posts/seh_veh_security_perspective/</link>
       <pubDate>Tue, 28 May 2024 00:00:00 +0000</pubDate>
